@@ -424,6 +424,63 @@ window.matchMedia("(prefers-color-scheme: light)").addEventListener("change", (e
 
 applyTheme(document.documentElement.dataset.theme === "light" ? "light" : "dark");
 
+// --- Ilovani o'rnatish (PWA) ---
+// Android / kompyuter Chrome: brauzerning o'rnatish oynasi; iPhone: qo'lda qo'shish ko'rsatmasi.
+
+const INSTALL_HIDE_KEY = "vocab-install-hidden";
+let installPrompt = null;
+const isStandalone = () => window.matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
+const isIos = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+
+function refreshInstall() {
+  let dismissed = false;
+  try {
+    dismissed = localStorage.getItem(INSTALL_HIDE_KEY) === "1";
+  } catch {}
+  $("install-banner").hidden = dismissed || isStandalone() || !(installPrompt || isIos);
+}
+
+window.addEventListener("beforeinstallprompt", (e) => {
+  e.preventDefault();
+  installPrompt = e;
+  refreshInstall();
+});
+
+window.addEventListener("appinstalled", () => {
+  installPrompt = null;
+  refreshInstall();
+  toast("Ilova o'rnatildi — bosh ekrandan oching");
+});
+
+$("install-btn").addEventListener("click", async () => {
+  if (!installPrompt) {
+    $("install-sheet").hidden = false;
+    return;
+  }
+  installPrompt.prompt();
+  await installPrompt.userChoice;
+  installPrompt = null;
+  refreshInstall();
+});
+
+$("install-close").addEventListener("click", () => {
+  try {
+    localStorage.setItem(INSTALL_HIDE_KEY, "1");
+  } catch {}
+  refreshInstall();
+});
+
+$("install-sheet").addEventListener("click", (e) => {
+  if (e.target.hasAttribute("data-close")) $("install-sheet").hidden = true;
+});
+
+// file:// orqali ochilganda service worker ishlamaydi
+if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
+  navigator.serviceWorker.register("sw.js").catch(() => {});
+}
+
+refreshInstall();
+
 // --- Asosiy sahifa ---
 
 function greeting() {

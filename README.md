@@ -40,6 +40,15 @@ npm run build:packs     # yoki: node scripts/build-packs.js
 
 Bu `web/packs.js` ni qayta yaratadi (ilova to'plamlarni shu fayldan o'qiydi, shuning uchun serversiz ishlaydi).
 
+## Ilova sifatida o'rnatish
+
+Ilova PWA: saytni ochib, telefon yoki kompyuterga o'rnatish mumkin — bosh ekrandagi ikonkadan alohida oynada ochiladi va internetsiz ham ishlaydi.
+
+- **Android / kompyuter (Chrome, Edge):** bosh sahifadagi "O'rnatish" tugmasi yoki brauzer menyusidagi "Ilovani o'rnatish".
+- **iPhone / iPad (Safari):** Ulashish → "Bosh ekranga qo'shish" (ilovadagi tugma ko'rsatmani ochadi).
+
+Oflayn ish `web/sw.js` (service worker) orqali: fayllar avval tarmoqdan olinadi, internet bo'lmasa keshdan. Service worker faqat `http(s)` orqali ishlaydi — `index.html` ni to'g'ridan-to'g'ri ochganda o'rnatish va oflayn rejim bo'lmaydi.
+
 ## Internetga joylash
 
 `web/` papkasini istalgan statik hostingga (GitHub Pages, Netlify, Vercel) yuklash kifoya.
