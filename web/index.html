@@ -5,6 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#0b0a1a">
   <title>Vocab</title>
+  <script>
+    // Mavzuni sahifa chizilishidan oldin qo'yamiz: ochilganda rang "miltillab" almashmasin
+    (function () {
+      var saved = null;
+      try { saved = localStorage.getItem("vocab-theme"); } catch (e) {}
+      var light = saved ? saved === "light" : window.matchMedia("(prefers-color-scheme: light)").matches;
+      document.documentElement.dataset.theme = light ? "light" : "dark";
+    })();
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Unbounded:wght@500;700;800&display=swap" rel="stylesheet">
@@ -21,7 +30,10 @@
           <p id="greeting" class="eyebrow">Salom</p>
           <h1>Bugun nimani <span class="grad-text">o'rganamiz?</span></h1>
         </div>
-        <div class="streak-chip" title="Ketma-ket kunlar"><i data-lucide="flame" class="flame"></i><b id="home-streak">0</b></div>
+        <div class="hello-actions">
+          <button id="theme-toggle" class="theme-toggle" type="button"></button>
+          <div class="streak-chip" title="Ketma-ket kunlar"><i data-lucide="flame" class="flame"></i><b id="home-streak">0</b></div>
+        </div>
       </header>
 
       <article class="hero glass">
@@ -98,6 +110,7 @@
       <div class="unit-actions">
         <button id="unit-start" class="btn btn-grad" type="button"><i data-lucide="play"></i><span>Boshlash</span></button>
         <button id="unit-retry" class="btn btn-danger-soft" type="button"><i data-lucide="rotate-ccw"></i><span>Bilmaganlarim</span></button>
+        <button id="unit-write" class="btn btn-glass unit-write" type="button"><i data-lucide="pen-line"></i><span>Yozib mashq qilish</span></button>
       </div>
 
       <div id="unit-seg" class="segmented">
@@ -148,6 +161,9 @@
       <h3 class="section-title">Leitner qutilari</h3>
       <div id="boxes" class="boxes glass"></div>
       <p class="muted small">1-quti har kuni, 7-quti 4 oyda bir takrorlanadi. 7-qutidagilar yodlangan hisoblanadi.</p>
+
+      <h3 class="section-title">Yozish mashqi</h3>
+      <div id="write-stats" class="write-stats"></div>
 
       <h3 class="section-title">Zaxira nusxa</h3>
       <div class="backup">
@@ -210,6 +226,69 @@
     </div>
   </div>
 
+  <!-- Yozish mashqi -->
+  <div id="write" class="study" hidden>
+    <div id="w-flash" class="flash" aria-hidden="true"></div>
+    <header class="study-top">
+      <button id="write-close" class="icon-btn" type="button" aria-label="Yopish"><i data-lucide="x"></i></button>
+      <div class="study-title">
+        <strong id="write-title"></strong>
+        <div class="bar"><span id="write-bar"></span></div>
+      </div>
+      <span id="write-count" class="study-count">0/0</span>
+    </header>
+    <div class="tally">
+      <span class="tally-ok"><i data-lucide="check"></i><b id="w-tally-ok">0</b> to'g'ri</span>
+      <span class="tally-no"><i data-lucide="x"></i><b id="w-tally-no">0</b> xato</span>
+    </div>
+
+    <div class="write-stage">
+      <article id="w-card" class="write-card">
+        <div class="face-top"><span id="w-dir" class="chip-mini"></span><span id="w-box" class="chip-mini"></span></div>
+        <p id="w-ask" class="write-ask"></p>
+        <div class="write-prompt">
+          <div id="w-prompt" class="term"></div>
+          <button id="w-say" class="icon-btn" type="button" aria-label="Talaffuz"><i data-lucide="volume-2"></i></button>
+        </div>
+        <p id="w-example" class="example write-example"></p>
+        <span id="w-chip" class="write-chip"></span>
+      </article>
+
+      <form id="w-form" class="write-form" autocomplete="off" novalidate>
+        <input id="w-input" class="write-input" type="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="done" aria-label="Javob">
+        <p id="w-hint" class="write-hint" aria-live="polite"></p>
+        <div id="w-feedback" class="write-feedback" role="status" hidden>
+          <div id="wf-head" class="wf-head"></div>
+          <p id="wf-yours" class="wf-yours"></p>
+          <p class="wf-answer"><span>To'g'ri javob</span><b id="wf-answer"></b></p>
+        </div>
+        <div id="w-ask-actions" class="write-actions">
+          <button id="w-help" class="btn btn-glass" type="button"><i data-lucide="lightbulb"></i><span>Yordam</span></button>
+          <button id="w-skip" class="btn btn-glass" type="button"><i data-lucide="eye"></i><span>Bilmayman</span></button>
+          <button id="w-check" class="btn btn-grad" type="submit"><span>Tekshirish</span><i data-lucide="corner-down-left"></i></button>
+        </div>
+        <div id="w-after-actions" class="write-actions after" hidden>
+          <button id="w-override" class="btn btn-glass" type="button"><i data-lucide="check"></i><span>Men to'g'ri yozdim</span></button>
+          <button id="w-next" class="btn btn-grad" type="button"><span>Davom etish</span><i data-lucide="arrow-right"></i></button>
+        </div>
+        <p class="write-keys">Enter — tekshirish / davom etish · Esc — chiqish</p>
+      </form>
+    </div>
+  </div>
+
+  <!-- Mashq turini tanlash -->
+  <div id="mode-sheet" class="sheet" hidden>
+    <div class="sheet-backdrop" data-close></div>
+    <div class="sheet-panel glass">
+      <div class="sheet-handle"></div>
+      <div>
+        <h2 id="mode-title"></h2>
+        <p id="mode-sub" class="muted small"></p>
+      </div>
+      <div id="mode-list" class="mode-list"></div>
+    </div>
+  </div>
+
   <!-- Tabrik -->
   <div id="celebrate" class="celebrate" hidden>
     <canvas id="fx" aria-hidden="true"></canvas>
@@ -226,9 +305,9 @@
         <i data-lucide="star"></i><i data-lucide="star"></i><i data-lucide="star"></i>
       </div>
       <div class="cel-score">
-        <div class="score-ok"><b id="cel-ok">0</b><small>bilaman</small></div>
+        <div class="score-ok"><b id="cel-ok">0</b><small id="cel-ok-label">bilaman</small></div>
         <div class="score-pct"><b id="cel-pct">0%</b><small>natija</small></div>
-        <div class="score-no"><b id="cel-no">0</b><small>bilmayman</small></div>
+        <div class="score-no"><b id="cel-no">0</b><small id="cel-no-label">bilmayman</small></div>
       </div>
       <div class="cel-lists">
         <div id="cel-no-wrap" class="cel-list cel-list-no">

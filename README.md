@@ -14,7 +14,8 @@ Ilova http://localhost:3000 da ochiladi. Yoki shunchaki `web/index.html` ni ikki
 
 - **Asosiy:** "English Vocabulary in Use — Elementary" kitobining 60 ta uniti (~1470 so'z) darhol ochiq — unitni bosing va o'rganing. Kunlik maqsad halqasi (20 ta javob), streak, "Davom ettirish" kartasi.
 - **Kartochka:** 3D aylanadi (bosing yoki ↻), "Bilaman" / "Bilmayman" tugmalari doim ko'rinadi, kartani o'ngga/chapga surib ham javob berish mumkin. 🔊 talaffuz. Klaviatura: Space — aylantirish, → bilaman, ← bilmayman, Esc — yopish.
-- **Takrorlash:** vaqti kelgan barcha so'zlar (Leitner jadvali bo'yicha).
+- **Yozib mashq qilish:** bo'lim ichida ikki yo'nalish — o'zbekchasini ko'rib inglizchasini yozish yoki aksincha. Kichik imlo xatolari, tutuq belgisi turlari (o' / oʻ / o‘) va bir nechta tarjimadan biri qabul qilinadi; lug'atdagi boshqa so'z esa xato hisoblanadi. "Yordam" birinchi harflarni ochadi, "Men to'g'ri yozdim" sinonimni qabul qildiradi. Har yo'nalishning Leitner progressi kartochkalardan alohida.
+- **Takrorlash:** vaqti kelgan barcha so'zlar (Leitner jadvali bo'yicha); yozish navbati bo'lsa, mashq turini tanlaysiz.
 - **Lug'at:** barcha so'zlar, qidiruv va filtrlar; o'z so'zingizni qo'shish.
 - **Statistika:** streak, so'nggi 7 kun faolligi, qutilar bo'yicha taqsimot, zaxira nusxa.
 

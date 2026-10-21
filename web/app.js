@@ -9,7 +9,8 @@ const DAILY_GOAL = 20;
 // progress: { [wordId]: { box, next, ok, no, last } } — last: oxirgi javob to'g'rimi
 // custom:   { [wordId]: { term, translation, example } } — foydalanuvchi o'zi qo'shgan so'zlar
 // history:  { "YYYY-MM-DD": javoblar soni }
-const emptyDb = () => ({ progress: {}, custom: {}, streak: 0, lastDay: null, history: {} });
+// write:    { en: { [wordId]: progress }, uz: { ... } } — yozish mashqi, har yo'nalish alohida Leitner
+const emptyDb = () => ({ progress: {}, custom: {}, streak: 0, lastDay: null, history: {}, write: { en: {}, uz: {} } });
 let db = emptyDb();
 let storageOk = true;
 
@@ -29,7 +30,7 @@ function normalize(data) {
   if (!data || typeof data !== "object") throw new Error("noto'g'ri format");
   if (data.words) return migrateV1(data);
   if (typeof data.progress !== "object") throw new Error("noto'g'ri format");
-  return { ...emptyDb(), ...data };
+  return { ...emptyDb(), ...data, write: { en: {}, uz: {}, ...data.write } };
 }
 
 function loadDb() {
@@ -68,6 +69,16 @@ const BOOKS = [
     author: "Michael McCarthy · Felicity O'Dell",
     cover: "img/evu-elementary.jpg",
     packs: PACKS.filter(isEvu),
+  },
+  {
+    // Hali so'zlari kiritilmagan: javonda ko'rinadi, lekin ochilmaydi
+    id: "evu-pi",
+    title: "English Vocabulary in Use",
+    level: "Pre-intermediate & Intermediate · B1–B2",
+    author: "Stuart Redman",
+    cover: "img/evu-pre-intermediate.jpg",
+    packs: [],
+    soon: true,
   },
   {
     id: "basic",
@@ -162,10 +173,15 @@ function applyAnswer(id, correct) {
   if (correct) p.ok++;
   else p.no++;
   db.progress[id] = p;
+  logAnswer();
+  saveDb();
+}
+
+/** Kunlik javoblar soni va streak (kartochka ham, yozish ham hisoblanadi) */
+function logAnswer() {
   const today = dayKey();
   db.history[today] = (db.history[today] || 0) + 1;
   touchStreak();
-  saveDb();
 }
 
 // --- Hisob-kitob ---
@@ -318,7 +334,7 @@ function parseRoute() {
   const [name, arg] = location.hash.replace(/^#\/?/, "").split("/");
   route.book = null;
   route.pack = null;
-  if (name === "book" && BOOKS.some((b) => b.id === arg)) {
+  if (name === "book" && BOOKS.some((b) => b.id === arg && !b.soon)) {
     route.view = "book";
     route.book = BOOKS.find((b) => b.id === arg);
   } else if (name === "unit" && packByLevel.has(arg)) {
@@ -363,10 +379,50 @@ $("dock-review").addEventListener("click", startReview);
 document.querySelectorAll("[data-back]").forEach((b) => b.addEventListener("click", () => go(b.dataset.back)));
 
 function refreshBadge() {
-  const due = dueIds().length;
+  const due = dueIds().length + writeDueCount();
   $("dock-badge").hidden = due === 0;
   $("dock-badge").textContent = due > 99 ? "99+" : due;
 }
+
+// --- Mavzu (qorong'i / yorug') ---
+// Tanlov brauzerda saqlanadi; tanlanmagan bo'lsa tizim sozlamasiga ergashadi.
+// Boshlang'ich qiymatni index.html dagi kichik skript sahifa chizilishidan oldin qo'yadi.
+
+const THEME_KEY = "vocab-theme";
+const THEME_COLOR = { dark: "#0b0a1a", light: "#f4f2ff" };
+
+function savedTheme() {
+  try {
+    return localStorage.getItem(THEME_KEY);
+  } catch {
+    return null;
+  }
+}
+
+function applyTheme(theme) {
+  document.documentElement.dataset.theme = theme;
+  document.querySelector('meta[name="theme-color"]').content = THEME_COLOR[theme];
+  const btn = $("theme-toggle");
+  const label = theme === "dark" ? "Yorug' rejimga o'tish" : "Qorong'i rejimga o'tish";
+  btn.replaceChildren(ic(theme === "dark" ? "sun" : "moon"));
+  btn.setAttribute("aria-label", label);
+  btn.title = label;
+  icons();
+}
+
+$("theme-toggle").addEventListener("click", () => {
+  const next = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+  try {
+    localStorage.setItem(THEME_KEY, next);
+  } catch {}
+  applyTheme(next);
+});
+
+window.matchMedia("(prefers-color-scheme: light)").addEventListener("change", (e) => {
+  if (!savedTheme()) applyTheme(e.matches ? "light" : "dark");
+});
+
+applyTheme(document.documentElement.dataset.theme === "light" ? "light" : "dark");
 
 // --- Asosiy sahifa ---
 
@@ -394,8 +450,9 @@ function renderHome() {
   $("goal-total").textContent = DAILY_GOAL;
 
   const next = nextPack(BOOKS[0]);
-  if (s.due > 0) {
-    $("hero-title").textContent = `${s.due} ta so'z kutmoqda`;
+  const due = s.due + writeDueCount();
+  if (due > 0) {
+    $("hero-title").textContent = `${due} ta so'z kutmoqda`;
     $("hero-sub").textContent = "Takrorlash vaqti keldi — eslab qolish shu paytda eng samarali.";
     setHeroButton("zap", "Takrorlash", startReview);
   } else if (s.today >= DAILY_GOAL) {
@@ -430,6 +487,7 @@ function coverEl(book, className = "cover") {
 }
 
 function bookCard(book, i) {
+  if (book.soon) return soonCard(book, i);
   const s = bookStats(book);
   const card = el("a", "book glass");
   card.href = `#/book/${book.id}`;
@@ -453,6 +511,26 @@ function bookCard(book, i) {
 
   main.append(el("p", "eyebrow", book.level), el("h3", "", book.title), el("p", "muted small", book.author), meta, bar, goLabel);
   card.append(coverEl(book), main);
+  return card;
+}
+
+function soonCard(book, i) {
+  const card = el("div", "book glass soon");
+  card.style.setProperty("--i", i);
+  card.setAttribute("aria-disabled", "true");
+
+  const cover = coverEl(book);
+  const ribbon = el("span", "soon-ribbon");
+  ribbon.append(ic("clock"), "Tez orada");
+  cover.append(ribbon);
+
+  const pill = el("span", "soon-pill");
+  pill.append(ic("lock"), "Tez orada qo'shiladi");
+  const main = el("div", "book-main");
+  main.append(el("p", "eyebrow", book.level), el("h3", "", book.title), el("p", "muted small", book.author), pill);
+
+  card.append(cover, main);
+  card.addEventListener("click", () => toast("Bu kitob tez orada qo'shiladi"));
   return card;
 }
 
@@ -646,12 +724,28 @@ function startRetry(pack, ids) {
 
 function startReview() {
   const ids = dueIds();
-  if (!ids.length) {
-    const next = Object.values(db.progress).reduce((m, p) => Math.min(m, p.next), Infinity);
-    toast(Number.isFinite(next) ? `Hozircha navbat yo'q. Keyingisi ${timeLeft(next)}dan keyin` : "Avval biror bo'limni o'rganing");
+  const wen = writeDueIds("en"), wuz = writeDueIds("uz");
+  if (!ids.length && !wen.length && !wuz.length) {
+    const all = [db.progress, db.write.en, db.write.uz].flatMap((m) => Object.values(m)).filter((p) => p.ok + p.no > 0);
+    const next = all.reduce((m, p) => Math.min(m, p.next), Infinity);
+    toast(Number.isFinite(next) ? `Hammasi takrorlangan. Keyingisi ${timeLeft(next)}dan keyin` : "Avval biror bo'limni o'rganing");
     return;
   }
-  startSession(ids.slice(0, 50), "Takrorlash", "review");
+  const cards = () => startSession(ids.slice(0, 50), "Takrorlash", "review");
+  if (!wen.length && !wuz.length) return cards();
+  const writeOpt = (key, list) => ({
+    icon: key === "en" ? "keyboard" : "pen-line",
+    title: `Yozish: ${WRITE_DIRS[key].label}`,
+    desc: WRITE_DIRS[key].desc,
+    count: list.length,
+    disabled: !list.length,
+    run: () => startWrite(list.slice(0, 50), `Yozib takrorlash · ${WRITE_DIRS[key].short}`, key, null, "write-review"),
+  });
+  openModes("Takrorlash", "Qaysi mashqdan boshlaymiz?", [
+    { icon: "layers", title: "Kartochkalar", desc: "So'zni ko'rib, bilasizmi — belgilaysiz", count: ids.length, disabled: !ids.length, run: cards },
+    writeOpt("en", wen),
+    writeOpt("uz", wuz),
+  ]);
 }
 
 function closeStudy() {
@@ -808,6 +902,426 @@ document.addEventListener("keydown", (e) => {
   if (e.key === "ArrowLeft") answer(false);
 });
 
+// --- Yozish mashqi ---
+// en: o'zbekcha ko'rsatiladi, inglizchasi yoziladi; uz: inglizcha ko'rsatiladi, o'zbekchasi yoziladi.
+// Progress kartochkalardan alohida: so'zni tanish va uni yoza olish — har xil daraja.
+
+const WRITE_DIRS = {
+  en: {
+    label: "O'zbekcha → Inglizcha",
+    short: "UZ → EN",
+    desc: "Tarjimani ko'rib, inglizchasini yozasiz",
+    ask: "Inglizchasini yozing",
+    placeholder: "Inglizcha so'z…",
+    prompt: (w) => w.translation,
+    answer: (w) => w.term,
+  },
+  uz: {
+    label: "Inglizcha → O'zbekcha",
+    short: "EN → UZ",
+    desc: "Inglizcha so'zni ko'rib, tarjimasini yozasiz",
+    ask: "O'zbekchasini yozing",
+    placeholder: "O'zbekcha tarjima…",
+    prompt: (w) => w.term,
+    answer: (w) => w.translation,
+  },
+};
+
+function wstatus(dir, id) {
+  const p = db.write[dir][id];
+  if (!p || p.ok + p.no === 0) return "new";
+  return p.last ? "ok" : "no";
+}
+
+function writeDueIds(dir, ids = Object.keys(db.write[dir]), now = Date.now()) {
+  const prog = db.write[dir];
+  return ids.filter((id) => WORDS.has(id) && prog[id] && prog[id].ok + prog[id].no > 0 && prog[id].next <= now).sort((a, b) => prog[a].next - prog[b].next);
+}
+
+const writeDueCount = () => writeDueIds("en").length + writeDueIds("uz").length;
+
+/** verdict: "ok" | "typo" | "override" — to'g'ri; "hint" — yordam bilan; "no" | "skip" — xato */
+function applyWrite(dir, id, verdict) {
+  const p = db.write[dir][id] ?? { box: 1, next: 0, ok: 0, no: 0 };
+  const fresh = p.ok + p.no === 0;
+  if (verdict === "hint") {
+    // Yordam bilan topilgan so'z qutisidan tushmaydi, lekin tez orada yana so'raladi
+    Object.assign(p, { next: Date.now() + RETRY_MINUTES * 60 * 1000, last: false });
+    p.no++;
+  } else {
+    const correct = ["ok", "typo", "override"].includes(verdict);
+    Object.assign(p, nextState(p.box, correct, fresh), { last: correct });
+    if (correct) p.ok++;
+    else p.no++;
+  }
+  db.write[dir][id] = p;
+  logAnswer();
+  saveDb();
+}
+
+// Javobni solishtirish: katta-kichik harf, tutuq belgisi turlari (ʻ ’ `), chiziqcha va tinish belgilari farq qilmaydi
+function normText(s) {
+  return s
+    .toLowerCase()
+    .normalize("NFC")
+    .replace(/[ʻʼ‘’`´]/g, "'")
+    .replace(/\.\.\.|…/g, " ")
+    .replace(/[-‐–—]/g, " ")
+    .replace(/[.!?;:"]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+const stripArticle = (s) => s.replace(/^(to|a|an|the) /, "");
+
+/** "aka, uka" -> aka | uka; "qiz (farzand)" -> qiz | qiz farzand; "child / children" -> child | children */
+function answerVariants(text, dir) {
+  const out = new Set();
+  for (const base of [text.replace(/\([^)]*\)/g, " "), text.replace(/[()]/g, " ")]) {
+    for (const part of base.split(/[,;/]/)) out.add(normText(part));
+  }
+  if (dir === "en") for (const v of [...out]) out.add(stripArticle(v));
+  out.delete("");
+  return [...out];
+}
+
+function editDistance(a, b) {
+  let prev = Array.from({ length: b.length + 1 }, (_, j) => j);
+  for (let i = 1; i <= a.length; i++) {
+    const cur = [i];
+    for (let j = 1; j <= b.length; j++) cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+    prev = cur;
+  }
+  return prev[b.length];
+}
+
+// Qisqa so'zda xatoga yo'l yo'q (son/sun), uzunroqda 1–2 harf xato "imlo xatosi" hisoblanadi
+const typoLimit = (len) => (len <= 3 ? 0 : len <= 7 ? 1 : 2);
+// Telefonda tutuq belgisi ko'pincha tushib qoladi: "ogil" ~ "o'g'il" — imlo xatosi, xato emas
+const noApostrophe = (s) => s.replace(/'/g, "");
+
+/** Lug'atdagi barcha to'g'ri javoblar: "good" — "food" ning imlo xatosi emas, boshqa so'z */
+const knownCache = { en: null, uz: null, size: 0 };
+function knownAnswers(dir) {
+  if (knownCache.size !== WORDS.size) Object.assign(knownCache, { en: null, uz: null, size: WORDS.size });
+  if (!knownCache[dir]) {
+    knownCache[dir] = new Set();
+    for (const w of WORDS.values()) for (const v of answerVariants(WRITE_DIRS[dir].answer(w), dir)) knownCache[dir].add(v);
+  }
+  return knownCache[dir];
+}
+
+/** { verdict: "ok" | "typo" | "no", best } — best: javobga eng yaqin to'g'ri variant */
+function checkAnswer(input, target, dir, known = knownAnswers(dir)) {
+  const variants = answerVariants(target, dir);
+  const clean = (s) => (dir === "en" ? stripArticle(normText(s)) : normText(s));
+  const judge = (part) => {
+    let best = { d: Infinity, v: variants[0] };
+    for (const v of variants) {
+      const d = part === v ? 0 : editDistance(noApostrophe(part), noApostrophe(v)) + 0.5;
+      if (d < best.d) best = { d, v };
+    }
+    if (best.d === 0) return { verdict: "ok", best: best.v };
+    const typo = best.d - 0.5 <= typoLimit(noApostrophe(best.v).length) && !known.has(part);
+    return { verdict: typo ? "typo" : "no", best: best.v };
+  };
+  if (clean(input) === clean(target)) return { verdict: "ok", best: normText(target) };
+  // "uka, aka" kabi bir nechta javob: har bir qismi alohida to'g'ri variantga mos kelishi kerak
+  const parts = input.split(/[,;/]/).map(clean).filter(Boolean);
+  if (!parts.length) return { verdict: "no", best: variants[0] };
+  const res = parts.map(judge);
+  const verdict = res.some((r) => r.verdict === "no") ? "no" : res.some((r) => r.verdict === "typo") ? "typo" : "ok";
+  return { verdict, best: res.map((r) => r.best).join(", ") };
+}
+
+/** To'g'ri javobni ko'rsatadi, foydalanuvchi adashgan harflarni belgilab */
+function diffMarks(input, target) {
+  const a = input, b = target;
+  const dp = Array.from({ length: a.length + 1 }, (_, i) => [i]);
+  for (let j = 1; j <= b.length; j++) dp[0][j] = j;
+  for (let i = 1; i <= a.length; i++)
+    for (let j = 1; j <= b.length; j++) dp[i][j] = Math.min(dp[i - 1][j] + 1, dp[i][j - 1] + 1, dp[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+  const wrong = new Set();
+  let i = a.length, j = b.length;
+  while (j > 0) {
+    if (i > 0 && dp[i][j] === dp[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1)) {
+      if (a[i - 1] !== b[j - 1]) wrong.add(j - 1);
+      i--, j--;
+    } else if (i > 0 && dp[i][j] === dp[i - 1][j] + 1) i--;
+    else wrong.add(--j);
+  }
+  const frag = document.createDocumentFragment();
+  [...b].forEach((ch, k) => frag.append(wrong.has(k) ? el("mark", "", ch) : ch));
+  return frag;
+}
+
+/** Misol gapda so'z o'rniga bo'sh joy; so'z topilmasa null (gap javobni oshkor qilmasin) */
+function clozeExample(example, term) {
+  const base = term.split(/[\s/]+/)[0].replace(/[^a-z']/gi, "");
+  const idx = base.length > 2 ? example.toLowerCase().indexOf(base.toLowerCase().slice(0, Math.max(3, base.length - 2))) : -1;
+  if (idx < 0) return null;
+  let end = idx;
+  while (end < example.length && /[a-z'-]/i.test(example[end])) end++;
+  const frag = document.createDocumentFragment();
+  frag.append(example.slice(0, idx), el("span", "blank", " "), example.slice(end));
+  return frag;
+}
+
+/** Yordam: javobning birinchi harflari, qolgani "_" — "f a _ _ _ _" */
+function hintMask(answer, shown) {
+  let k = 0;
+  return [...answer].map((ch) => (/\s/.test(ch) ? "  " : k++ < shown ? ch : "_")).join(" ");
+}
+
+const write = { phase: "ask", hints: 0, verdict: null, input: "" };
+
+function startWrite(ids, title, dir, pack = null, kind = "write") {
+  if (!ids.length) return;
+  Object.assign(session, { ids, i: 0, ok: 0, no: 0, results: new Map(), title, kind, pack, dir, busy: false });
+  $("write").hidden = false;
+  $("write-title").textContent = title;
+  $("w-tally-ok").textContent = "0";
+  $("w-tally-no").textContent = "0";
+  document.body.style.overflow = "hidden";
+  showWriteCard();
+  icons();
+}
+
+/** Bo'lim uchun navbat: shu yo'nalishda vaqti kelganlar, keyin hali yozilmaganlar */
+function startUnitWrite(pack, dir) {
+  const ids = packIds.get(pack.level);
+  let queue = [...writeDueIds(dir, ids), ...ids.filter((id) => wstatus(dir, id) === "new")];
+  if (!queue.length) {
+    queue = [...ids].sort(() => Math.random() - 0.5);
+    toast("Bo'lim to'liq o'zlashtirilgan — qayta mashq rejimi");
+  }
+  startWrite(queue, `${unitNumber(pack)}. ${unitName(pack)} · yozish`, dir, pack);
+}
+
+function currentWord() {
+  return WORDS.get(session.ids[session.i]);
+}
+
+function showWriteCard() {
+  if (session.i >= session.ids.length) return finishWrite();
+  const dir = WRITE_DIRS[session.dir];
+  const w = currentWord();
+  const p = db.write[session.dir][w.id];
+  const pack = packByLevel.get(w.pack);
+  Object.assign(write, { phase: "ask", hints: 0, verdict: null, input: "" });
+
+  $("w-dir").textContent = dir.short;
+  $("w-box").textContent = wstatus(session.dir, w.id) === "new" ? "Yangi" : `${p.box}-quti`;
+  $("w-ask").textContent = dir.ask;
+  $("w-prompt").textContent = dir.prompt(w);
+  $("w-say").hidden = session.dir !== "uz";
+  $("w-chip").textContent = pack ? pack.subtitle || pack.title : "Mening so'zim";
+  const example = w.example ? (session.dir === "en" ? clozeExample(w.example, w.term) : highlight(w.example, w.term)) : null;
+  $("w-example").replaceChildren(example || "");
+  $("w-example").hidden = !example;
+
+  const input = $("w-input");
+  input.value = "";
+  input.readOnly = false;
+  input.className = "write-input";
+  input.placeholder = dir.placeholder;
+  input.lang = session.dir;
+  $("w-hint").textContent = "";
+  $("w-feedback").hidden = true;
+  $("w-ask-actions").hidden = false;
+  $("w-after-actions").hidden = true;
+
+  $("write-count").textContent = `${session.i + 1}/${session.ids.length}`;
+  $("write-bar").style.width = `${(session.i / session.ids.length) * 100}%`;
+
+  const card = $("w-card");
+  card.classList.remove("enter", "shake");
+  void card.offsetWidth;
+  card.classList.add("enter");
+  input.focus({ preventScroll: true });
+}
+
+const FEEDBACK = {
+  ok: { cls: "ok", icon: "circle-check", title: "To'g'ri!" },
+  override: { cls: "ok", icon: "circle-check", title: "To'g'ri deb hisoblandi" },
+  typo: { cls: "typo", icon: "spell-check", title: "Deyarli to'g'ri — imloga e'tibor bering" },
+  hint: { cls: "typo", icon: "lightbulb", title: "Yordam bilan topdingiz — tez orada yana so'raladi" },
+  no: { cls: "no", icon: "circle-x", title: "Noto'g'ri" },
+  skip: { cls: "no", icon: "eye", title: "To'g'ri javob" },
+};
+
+function showFeedback() {
+  const w = currentWord();
+  const dir = WRITE_DIRS[session.dir];
+  const { verdict, input, best } = write;
+  const f = FEEDBACK[verdict];
+
+  $("w-input").className = `write-input is-${f.cls}`;
+  const box = $("w-feedback");
+  box.className = `write-feedback ${f.cls}`;
+  box.hidden = false;
+  $("wf-head").replaceChildren(ic(f.icon), el("b", "", f.title));
+
+  const yours = $("wf-yours");
+  yours.hidden = !(verdict === "typo" || verdict === "no");
+  if (verdict === "typo") yours.replaceChildren("Siz: ", el("s", "", input), "  →  ", diffMarks(normText(input), best));
+  else if (verdict === "no") yours.replaceChildren("Siz: ", el("s", "", input));
+  $("wf-answer").textContent = dir.answer(w);
+  if (session.dir === "en" && w.example) $("w-example").replaceChildren(highlight(w.example, w.term));
+  $("w-example").hidden = !w.example;
+
+  $("w-ask-actions").hidden = true;
+  $("w-after-actions").hidden = false;
+  $("w-override").hidden = verdict !== "no";
+  $("w-after-actions").classList.toggle("single", verdict !== "no");
+  icons();
+}
+
+function checkWrite() {
+  const raw = $("w-input").value.trim();
+  if (!raw) {
+    $("w-input").focus();
+    return;
+  }
+  const w = currentWord();
+  const res = checkAnswer(raw, WRITE_DIRS[session.dir].answer(w), session.dir);
+  const verdict = res.verdict === "no" ? "no" : write.hints ? "hint" : res.verdict;
+  revealWrite(verdict, raw, res.best);
+}
+
+function revealWrite(verdict, input = "", best = "") {
+  if (write.phase !== "ask") return;
+  Object.assign(write, { phase: "result", verdict, input, best });
+  $("w-input").readOnly = true;
+  $("w-input").focus({ preventScroll: true });
+  const good = ["ok", "typo", "override"].includes(verdict);
+  navigator.vibrate?.(good ? 12 : [20, 40, 20]);
+  const flash = $("w-flash");
+  flash.className = "flash";
+  void flash.offsetWidth;
+  flash.className = `flash ${good ? "ok" : "no"}`;
+  if (!good) {
+    const card = $("w-card");
+    card.classList.remove("enter", "shake");
+    void card.offsetWidth;
+    card.classList.add("shake");
+  }
+  if (session.dir === "en") speak(currentWord().term);
+  showFeedback();
+}
+
+function nextWrite() {
+  if (write.phase !== "result") return;
+  const id = session.ids[session.i];
+  const good = ["ok", "typo", "override"].includes(write.verdict);
+  applyWrite(session.dir, id, write.verdict);
+  session.results.set(id, good);
+  if (good) bump($("w-tally-ok"), ++session.ok);
+  else bump($("w-tally-no"), ++session.no);
+  session.i++;
+  showWriteCard();
+}
+
+function closeWrite() {
+  $("write").hidden = true;
+  document.body.style.overflow = "";
+  render();
+}
+
+function finishWrite() {
+  $("write").hidden = true;
+  celebrate();
+}
+
+function writeEnter() {
+  if (write.phase === "ask") checkWrite();
+  else nextWrite();
+}
+$("w-form").addEventListener("submit", (e) => {
+  e.preventDefault();
+  writeEnter();
+});
+// Enter ni o'zimiz ushlaymiz: natija holatida "Tekshirish" yashirin bo'lsa ham ishlashi uchun
+$("w-input").addEventListener("keydown", (e) => {
+  if (e.key !== "Enter" || e.isComposing) return;
+  e.preventDefault();
+  writeEnter();
+});
+$("w-help").addEventListener("click", () => {
+  const answer = answerVariants(WRITE_DIRS[session.dir].answer(currentWord()), session.dir).sort((a, b) => a.length - b.length)[0];
+  const letters = answer.replace(/\s/g, "").length;
+  if (write.hints >= letters - 1) return;
+  write.hints++;
+  $("w-hint").textContent = hintMask(answer, write.hints);
+  $("w-input").focus();
+});
+$("w-skip").addEventListener("click", () => revealWrite("skip"));
+$("w-override").addEventListener("click", () => {
+  write.verdict = "override";
+  showFeedback();
+  $("w-input").focus();
+});
+$("w-next").addEventListener("click", nextWrite);
+$("w-say").addEventListener("click", () => speak(currentWord().term));
+$("write-close").addEventListener("click", closeWrite);
+$("write").addEventListener("keydown", (e) => {
+  if (e.key === "Escape") closeWrite();
+});
+
+// --- Rejim tanlash oynasi ---
+
+function openModes(title, sub, options) {
+  $("mode-title").textContent = title;
+  $("mode-sub").textContent = sub;
+  $("mode-list").replaceChildren(
+    ...options.map((o) => {
+      const btn = el("button", "mode-opt");
+      btn.type = "button";
+      btn.disabled = !!o.disabled;
+      const icon = el("span", "mode-ic");
+      icon.append(ic(o.icon));
+      const text = el("span", "mode-text");
+      text.append(el("b", "", o.title), el("small", "", o.desc));
+      if (o.meta) text.append(el("small", "mode-meta", o.meta));
+      btn.append(icon, text, el("span", "mode-count", o.count));
+      btn.addEventListener("click", () => {
+        $("mode-sheet").hidden = true;
+        o.run();
+      });
+      return btn;
+    }),
+  );
+  $("mode-sheet").hidden = false;
+  icons();
+}
+
+$("mode-sheet").addEventListener("click", (e) => {
+  if (e.target.hasAttribute("data-close")) $("mode-sheet").hidden = true;
+});
+
+function openUnitWrite(pack) {
+  const ids = packIds.get(pack.level);
+  openModes(
+    "Yozib mashq qilish",
+    `${unitNumber(pack)}. ${unitName(pack)} · ${ids.length} so'z`,
+    Object.entries(WRITE_DIRS).map(([key, d]) => {
+      const due = writeDueIds(key, ids).length;
+      const fresh = ids.filter((id) => wstatus(key, id) === "new").length;
+      const learned = ids.filter((id) => wstatus(key, id) === "ok").length;
+      return {
+        icon: key === "en" ? "keyboard" : "pen-line",
+        title: d.label,
+        desc: d.desc,
+        meta: `${learned}/${ids.length} o'zlashtirilgan${due ? ` · ${due} navbatda` : ""}`,
+        count: due + fresh || "↻",
+        run: () => startUnitWrite(pack, key),
+      };
+    }),
+  );
+}
+
+$("unit-write").addEventListener("click", () => openUnitWrite(route.pack));
+
 // --- Tabrik ---
 
 function finishSession() {
@@ -815,14 +1329,25 @@ function finishSession() {
   celebrate();
 }
 
+// Harflar so'z ichida guruhlanadi: tor ekranda sarlavha so'z o'rtasidan bo'linmasin
 function splitLetters(node, text) {
-  node.replaceChildren(
-    ...[...text].map((ch, l) => {
-      const span = el("span", ch === " " ? "space" : "", ch === " " ? " " : ch);
-      span.style.setProperty("--l", l);
-      return span;
-    }),
-  );
+  let l = 0;
+  const parts = [];
+  text.split(" ").forEach((word, k) => {
+    if (k) {
+      const space = el("span", "space", "\u00a0");
+      space.style.setProperty("--l", l++);
+      parts.push(space);
+    }
+    const wrap = el("span", "word");
+    for (const ch of word) {
+      const span = el("span", "", ch);
+      span.style.setProperty("--l", l++);
+      wrap.append(span);
+    }
+    parts.push(wrap);
+  });
+  node.replaceChildren(...parts);
 }
 
 function tagList(ids) {
@@ -839,13 +1364,16 @@ function celebrate() {
   const pct = total ? Math.round((session.ok / total) * 100) : 0;
   const stars = pct >= 90 ? 3 : pct >= 60 ? 2 : 1;
   const pack = session.pack;
+  const writing = session.kind.startsWith("write");
+  $("cel-ok-label").textContent = writing ? "to'g'ri" : "bilaman";
+  $("cel-no-label").textContent = writing ? "xato" : "bilmayman";
 
-  $("cel-ribbon").textContent = session.kind === "review" ? "Takrorlash tugadi" : `${unitNumber(pack)}-bo'lim tugallandi`;
+  $("cel-ribbon").textContent = !pack ? "Takrorlash tugadi" : writing ? `${unitNumber(pack)}-bo'lim · yozish` : `${unitNumber(pack)}-bo'lim tugallandi`;
   const title = ["Yaxshi boshlanish!", "Zo'r ish!", "Mukammal!"][stars - 1];
   const titleNode = $("cel-title");
   titleNode.classList.toggle("wave", stars === 3);
   splitLetters(titleNode, title);
-  $("cel-sub").textContent = session.kind === "review" ? `${total} ta so'z takrorlandi` : `${unitName(pack)} — ${total} ta so'z`;
+  $("cel-sub").textContent = !pack ? `${total} ta so'z ${writing ? "yozildi" : "takrorlandi"}` : `${unitName(pack)} — ${total} ta so'z`;
 
   $("cel-stars").replaceChildren(...[0, 1, 2].map((k) => ic("star", k < stars ? "lit" : "")));
   $("cel-ok").dataset.value = 0;
@@ -867,19 +1395,21 @@ function celebrate() {
   $("cel-no-list").replaceChildren(...tagList(unknown));
   $("cel-ok-list").replaceChildren(...tagList(known));
 
-  $("cel-retry").hidden = !unknown.length || !pack;
+  $("cel-retry").hidden = !unknown.length || (!pack && !writing);
   $("cel-retry").onclick = () => {
     closeCelebrate(false);
-    startRetry(pack, unknown);
+    if (writing) startWrite(unknown, `${session.title} · xatolar`, session.dir, pack, session.kind);
+    else startRetry(pack, unknown);
   };
 
   const book = pack && bookOf.get(pack.level);
   const nextP = book && book.packs[book.packs.indexOf(pack) + 1];
-  $("cel-next").hidden = !nextP || session.kind === "review";
+  $("cel-next").hidden = !nextP || session.kind === "review" || session.kind === "write-review";
   $("cel-next").onclick = () => {
     closeCelebrate(false);
     go(`#/unit/${nextP.level}`);
-    startUnit(nextP);
+    if (writing) startUnitWrite(nextP, session.dir);
+    else startUnit(nextP);
   };
   $("cel-close").replaceChildren(ic(pack ? "layers" : "house"), el("span", "", pack ? "Bo'limlarga" : "Bosh sahifa"));
   $("cel-close").onclick = () => {
@@ -1137,6 +1667,26 @@ function renderStats() {
     rows.push(row);
   }
   $("boxes").replaceChildren(...rows);
+
+  $("write-stats").replaceChildren(
+    ...Object.entries(WRITE_DIRS).map(([key, d]) => {
+      const list = Object.entries(db.write[key]).filter(([id, p]) => WORDS.has(id) && p.ok + p.no > 0);
+      const learned = list.filter(([id]) => wstatus(key, id) === "ok").length;
+      const ok = list.reduce((n, [, p]) => n + p.ok, 0);
+      const answers = list.reduce((n, [, p]) => n + p.ok + p.no, 0);
+      const card = el("div", "ws-card glass");
+      const head = el("div", "ws-head");
+      head.append(ic(key === "en" ? "keyboard" : "pen-line"), el("b", "", d.label));
+      const nums = el("div", "ws-nums");
+      for (const [value, label] of [[learned, "o'zlashtirilgan"], [writeDueIds(key).length, "navbatda"], [answers ? `${Math.round((ok / answers) * 100)}%` : "—", "aniqlik"]]) {
+        const cell = el("div");
+        cell.append(el("b", "", String(value)), el("small", "", label));
+        nums.append(cell);
+      }
+      card.append(head, nums);
+      return card;
+    }),
+  );
 }
 
 // --- Zaxira nusxa ---
@@ -1247,10 +1797,6 @@ function buildPdf() {
   doc.text("O'rganish hisoboti", left, 27);
   font("normal", 10);
   doc.text(`Sana: ${dayKey()}   ·   ${Object.keys(db.progress).length} ta so'z progressi`, left, 36);
-  font("normal", 8.5);
-  doc.text("Tayyorlab berdi", right, 14, { align: "right" });
-  font("bold", 11);
-  doc.text(PDF_AUTHOR, right, 20, { align: "right" });
   y = 56;
 
   // --- Kartochkalar ---
@@ -1333,7 +1879,7 @@ function buildPdf() {
 
   // --- Kitoblar ---
   heading("Kitoblar", "ma'lumot qaysi kitob so'zlari asosida");
-  for (const book of BOOKS) {
+  for (const book of BOOKS.filter((b) => !b.soon)) {
     ensure(30);
     const b = bookStats(book);
     const color = BOOK_COLOR[book.id] || C.accent;
@@ -1472,7 +2018,7 @@ function buildPdf() {
   doc.line(sx, y + 24, right - 6, y + 24);
   font("normal", 8);
   ink(C.muted);
-  doc.text(PDF_AUTHOR, sx, y + 29);
+  doc.text("Imzo", sx, y + 29);
   doc.text(dayKey(), right - 6, y + 29, { align: "right" });
 
   // --- Pastki qism ---
@@ -1483,7 +2029,7 @@ function buildPdf() {
     doc.line(left, 284, right, 284);
     font("normal", 8);
     ink(C.muted);
-    doc.text(`Vocab  ·  Tayyorlab berdi: ${PDF_AUTHOR}`, left, 289);
+    doc.text("Vocab  ·  O'rganish hisoboti", left, 289);
     doc.text(`${i} / ${pages}`, right, 289, { align: "right" });
   }
 

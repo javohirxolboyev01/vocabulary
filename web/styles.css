@@ -14,6 +14,8 @@
   --gold: #ffc53d;
   --fire: #ff8a3d;
   --blue: #4cc2ff;
+  --warn: #ffc53d;
+  --warn-soft: rgba(255, 197, 61, .14);
   --shadow: 0 20px 50px -20px rgba(0, 0, 0, .6);
   --radius: 22px;
   --box-1: #ff5c7a;
@@ -33,24 +35,25 @@
   color-scheme: dark;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    --bg: #f4f2ff;
-    --surface: rgba(255, 255, 255, .72);
-    --surface-2: rgba(255, 255, 255, .95);
-    --border: rgba(40, 30, 90, .08);
-    --text: #17142e;
-    --muted: #6c6890;
-    --ok: #12b886;
-    --ok-soft: rgba(18, 184, 134, .12);
-    --no: #f03e5f;
-    --no-soft: rgba(240, 62, 95, .1);
-    --shadow: 0 20px 50px -24px rgba(60, 40, 140, .35);
-    --aurora-1: #b7a6ff;
-    --aurora-2: #ffb0d2;
-    --aurora-3: #a6e1ff;
-    color-scheme: light;
-  }
+/* Yorug' mavzu: data-theme ni index.html (tizim sozlamasi yoki saqlangan tanlov) va mavzu tugmasi qo'yadi */
+:root[data-theme="light"] {
+  --bg: #f4f2ff;
+  --surface: rgba(255, 255, 255, .72);
+  --surface-2: rgba(255, 255, 255, .95);
+  --border: rgba(40, 30, 90, .08);
+  --text: #17142e;
+  --muted: #6c6890;
+  --ok: #12b886;
+  --ok-soft: rgba(18, 184, 134, .12);
+  --no: #f03e5f;
+  --no-soft: rgba(240, 62, 95, .1);
+  --warn: #c77700;
+  --warn-soft: rgba(230, 150, 0, .12);
+  --shadow: 0 20px 50px -24px rgba(60, 40, 140, .35);
+  --aurora-1: #b7a6ff;
+  --aurora-2: #ffb0d2;
+  --aurora-3: #a6e1ff;
+  color-scheme: light;
 }
 
 * { box-sizing: border-box; }
@@ -144,6 +147,23 @@ main {
 }
 .back-btn:hover { transform: translateX(-3px); }
 
+.hello-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.theme-toggle {
+  width: 42px;
+  height: 42px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: transform .2s var(--spring), border-color .2s;
+}
+.theme-toggle:hover { border-color: #8b6cff; }
+.theme-toggle:active { transform: scale(.9); }
+.theme-toggle .lucide { width: 19px; height: 19px; animation: theme-in .45s var(--spring); }
+@keyframes theme-in { from { opacity: 0; transform: rotate(-90deg) scale(.4); } }
 .streak-chip {
   display: flex;
   align-items: center;
@@ -316,6 +336,46 @@ main {
 .book-go .lucide { color: #ff5ca8; transition: transform .25s var(--spring); }
 .book:hover .book-go .lucide { transform: translateX(5px); }
 
+/* "Tez orada" kitob: ko'rinadi, lekin ochilmaydi */
+.book.soon { cursor: default; }
+.book.soon:hover { transform: none; border-color: var(--border); }
+.book.soon:hover .cover { transform: rotateY(-14deg) rotateX(2deg); }
+.book.soon .cover img { filter: saturate(.55) brightness(.7); }
+.soon-ribbon {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 12%;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 5px 4px;
+  background: rgba(11, 10, 26, .78);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+.soon-ribbon .lucide { width: 12px; height: 12px; }
+.soon-pill {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px dashed var(--border);
+  background: var(--surface);
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 800;
+}
+.soon-pill .lucide { width: 14px; height: 14px; }
+
 /* ---------- Kitob sahifasi ---------- */
 .book-hero { display: flex; gap: 22px; align-items: center; margin-bottom: 8px; perspective: 900px; }
 .book-hero-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
@@ -477,6 +537,7 @@ main {
 .unit-actions { display: grid; grid-template-columns: 1.4fr 1fr; gap: 10px; margin-top: 14px; }
 .unit-actions.single { grid-template-columns: 1fr; }
 .unit-actions .btn { white-space: nowrap; padding: 14px 12px; font-size: 15px; }
+.unit-actions .unit-write { grid-column: 1 / -1; }
 
 .segmented {
   display: grid;
@@ -920,6 +981,7 @@ main {
 .cel-title { font-size: clamp(28px, 8vw, 40px); line-height: 1.1; }
 .cel-title span { display: inline-block; animation: letter .9s var(--spring) both; animation-delay: calc(.5s + var(--l) * 45ms); }
 .cel-title span.space { width: .3em; }
+.cel-title span.word, .cel-title.wave span.word { animation: none; white-space: nowrap; }
 @keyframes letter {
   0% { transform: translateY(40px) rotate(12deg) scale(.4); opacity: 0; }
   60% { transform: translateY(-10px) rotate(-4deg) scale(1.1); opacity: 1; }
@@ -959,6 +1021,140 @@ main {
 .cel-actions .btn { width: 100%; }
 .celebrate .btn-glass { background: rgba(255, 255, 255, .08); border-color: rgba(255, 255, 255, .14); color: #fff; }
 .celebrate .btn-danger-soft { background: rgba(255, 92, 122, .16); color: #ffb3c1; border-color: rgba(255, 92, 122, .4); }
+
+/* ---------- Yozish mashqi ---------- */
+.write-stage { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 14px; width: min(480px, 100%); margin: 0 auto; padding: 16px 0 0; min-height: 0; }
+.write-card {
+  position: relative;
+  border-radius: 30px;
+  padding: 56px 22px 22px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  text-align: center;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: linear-gradient(160deg, var(--surface-2), var(--surface));
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 30px 70px -25px rgba(0, 0, 0, .55);
+}
+.write-card::before {
+  content: "";
+  position: absolute;
+  width: 240px;
+  height: 240px;
+  border-radius: 50%;
+  background: var(--grad);
+  filter: blur(70px);
+  opacity: .22;
+  bottom: -120px;
+  right: -80px;
+  pointer-events: none;
+}
+.write-card.enter { animation: card-in .5s cubic-bezier(.2, 1.2, .3, 1); }
+.write-card.shake { animation: shake .42s ease; }
+@keyframes shake { 20% { transform: translateX(-9px); } 40% { transform: translateX(8px); } 60% { transform: translateX(-5px); } 80% { transform: translateX(3px); } }
+.write-ask { font-size: 11px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.write-prompt { display: flex; align-items: center; justify-content: center; gap: 10px; max-width: 100%; }
+.write-prompt .term { font-size: clamp(24px, 7vw, 38px); }
+.write-prompt .icon-btn { width: 38px; height: 38px; border-radius: 12px; }
+.write-prompt .icon-btn[hidden] { display: none; }
+.write-example { font-size: 15px; max-width: 34ch; color: var(--muted); opacity: 1; }
+.write-example[hidden] { display: none; }
+.write-example mark { background: var(--surface-2); color: var(--text); }
+.write-example .blank { display: inline-block; min-width: 3.4em; border-bottom: 2px dashed currentColor; margin: 0 2px; }
+.write-chip { font-size: 12px; color: var(--muted); max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.write-form { display: flex; flex-direction: column; gap: 10px; }
+.write-input {
+  width: 100%;
+  border: 2px solid var(--border);
+  border-radius: 18px;
+  background: var(--surface);
+  color: var(--text);
+  padding: 16px 18px;
+  font: 600 20px/1.3 var(--font);
+  text-align: center;
+  outline: none;
+  transition: border-color .2s, box-shadow .2s, background .2s;
+}
+.write-input::placeholder { color: var(--muted); font-weight: 500; }
+.write-input:focus { border-color: #8b6cff; box-shadow: 0 0 0 5px rgba(139, 108, 255, .18); }
+.write-input.is-ok { border-color: var(--ok); background: var(--ok-soft); box-shadow: none; }
+.write-input.is-typo { border-color: var(--warn); background: var(--warn-soft); box-shadow: none; }
+.write-input.is-no { border-color: var(--no); background: var(--no-soft); box-shadow: none; }
+.write-hint:empty { display: none; }
+.write-hint { text-align: center; font: 700 16px ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .12em; color: var(--warn); white-space: pre; overflow: hidden; text-overflow: ellipsis; }
+
+.write-feedback { border-radius: 18px; padding: 14px 16px; display: flex; flex-direction: column; gap: 8px; animation: fb-in .35s var(--ease); }
+.write-feedback[hidden] { display: none; }
+@keyframes fb-in { from { opacity: 0; transform: translateY(8px); } }
+.write-feedback.ok { background: var(--ok-soft); color: var(--ok); }
+.write-feedback.typo { background: var(--warn-soft); color: var(--warn); }
+.write-feedback.no { background: var(--no-soft); color: var(--no); }
+.wf-head { display: flex; align-items: center; gap: 8px; font-size: 15px; }
+.wf-head .lucide { width: 20px; height: 20px; flex-shrink: 0; }
+.wf-yours { color: var(--text); font-size: 14px; word-break: break-word; }
+.wf-yours[hidden] { display: none; }
+.wf-yours s { opacity: .65; }
+.wf-answer { color: var(--text); display: flex; flex-direction: column; gap: 2px; }
+.wf-answer span { font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.wf-answer b { font: 700 20px/1.3 var(--display); word-break: break-word; }
+.wf-yours mark { background: var(--warn-soft); color: var(--warn); border-radius: 4px; padding: 0 1px; font-weight: 800; }
+
+.write-actions { display: grid; grid-template-columns: 1fr 1fr; grid-template-areas: "check check" "help skip"; gap: 10px; }
+#w-check { grid-area: check; }
+#w-help { grid-area: help; }
+#w-skip { grid-area: skip; }
+.write-actions.after { grid-template-columns: 1fr 1.3fr; grid-template-areas: none; }
+.write-actions.after.single { grid-template-columns: 1fr; }
+.write-actions[hidden] { display: none; }
+.write-actions .btn { padding: 14px 10px; font-size: 15px; white-space: nowrap; }
+.write-actions .btn[hidden] { display: none; }
+.write-keys { text-align: center; font-size: 12px; color: var(--muted); }
+@media (hover: none) { .write-keys { display: none; } }
+@media (min-width: 640px) {
+  .write-actions { grid-template-columns: 1fr 1fr 1.3fr; grid-template-areas: "help skip check"; }
+}
+@media (max-width: 360px) { .write-actions.after .btn { font-size: 14px; padding: 13px 6px; gap: 5px; } }
+
+/* ---------- Mashq turini tanlash ---------- */
+.mode-list { display: flex; flex-direction: column; gap: 10px; }
+.mode-opt {
+  display: grid;
+  grid-template-columns: 46px 1fr auto;
+  align-items: center;
+  gap: 14px;
+  padding: 14px;
+  border-radius: 18px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  cursor: pointer;
+  text-align: left;
+  transition: transform .15s ease, border-color .2s;
+}
+.mode-opt:hover:not(:disabled) { border-color: #8b6cff; transform: translateY(-1px); }
+.mode-opt:active:not(:disabled) { transform: scale(.98); }
+.mode-opt:disabled { opacity: .45; cursor: not-allowed; }
+.mode-ic { width: 46px; height: 46px; border-radius: 14px; display: grid; place-items: center; background: var(--grad); color: #fff; }
+.mode-ic .lucide { width: 22px; height: 22px; }
+.mode-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.mode-text b { font-weight: 800; }
+.mode-text small { color: var(--muted); font-size: 13px; }
+.mode-text .mode-meta { color: var(--text); font-weight: 700; font-size: 12px; margin-top: 2px; }
+.mode-count { font: 700 16px var(--display); min-width: 36px; text-align: center; padding: 6px 10px; border-radius: 999px; background: var(--surface-2); }
+
+/* Statistika: yozish */
+.write-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media (max-width: 460px) { .write-stats { grid-template-columns: 1fr; } }
+.ws-card { border-radius: 22px; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+.ws-head { display: flex; align-items: center; gap: 8px; font-size: 14px; }
+.ws-head .lucide { width: 18px; height: 18px; color: #8b6cff; }
+.ws-nums { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.ws-nums b { display: block; font: 700 22px/1.2 var(--display); }
+.ws-nums small { color: var(--muted); font-size: 11px; }
 
 /* ---------- Sheet ---------- */
 .sheet { position: fixed; inset: 0; z-index: 50; display: flex; align-items: flex-end; justify-content: center; }
