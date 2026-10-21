@@ -1,0 +1,23 @@
+[
+  {"term": "film", "translation": "film", "example": "We watched a funny film last night."},
+  {"term": "cinema", "translation": "kinoteatr", "example": "Let's go to the cinema on Saturday."},
+  {"term": "film star", "translation": "kino yulduzi", "example": "She wants to be a film star one day."},
+  {"term": "director", "translation": "rejissyor", "example": "Who is the director of this film?"},
+  {"term": "play", "translation": "rol o'ynamoq", "example": "He played a doctor in his last film."},
+  {"term": "western", "translation": "vestern (kovboylar haqidagi film)", "example": "My grandfather loves old westerns."},
+  {"term": "thriller", "translation": "triller", "example": "The thriller was very exciting."},
+  {"term": "action film", "translation": "jangari film", "example": "Action films have a lot of fights and car chases."},
+  {"term": "science fiction film", "translation": "ilmiy-fantastik film", "example": "This science fiction film is about life on Mars."},
+  {"term": "musical", "translation": "myuzikl", "example": "In a musical, the actors sing and dance."},
+  {"term": "romantic comedy", "translation": "romantik komediya", "example": "We watched a romantic comedy about two students."},
+  {"term": "cartoon", "translation": "multfilm", "example": "Children love cartoons."},
+  {"term": "comedy", "translation": "komediya", "example": "The comedy was so funny, we laughed a lot."},
+  {"term": "horror film", "translation": "qo'rqinchli film", "example": "I never watch horror films alone."},
+  {"term": "go to the cinema", "translation": "kinoga bormoq", "example": "We go to the cinema once a month."},
+  {"term": "watch DVDs", "translation": "DVD tomosha qilmoq", "example": "On rainy days we watch DVDs at home."},
+  {"term": "What's on?", "translation": "Nima ko'rsatilyapti?", "example": "What's on at the cinema tonight?"},
+  {"term": "on TV", "translation": "televizorda", "example": "There is a good film on TV tonight."},
+  {"term": "love", "translation": "juda yoqtirmoq, sevmoq", "example": "I loved the music in that film."},
+  {"term": "enjoy", "translation": "zavqlanmoq, yoqmoq", "example": "Did you enjoy the film?"},
+  {"term": "boring", "translation": "zerikarli", "example": "The film was long and boring."}
+]

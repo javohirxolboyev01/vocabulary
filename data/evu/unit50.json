@@ -1,0 +1,17 @@
+[
+  {"term": "and", "translation": "va", "example": "I have a brother and a sister."},
+  {"term": "but", "translation": "lekin, ammo", "example": "The bag is nice but expensive."},
+  {"term": "or", "translation": "yoki", "example": "Do you want tea or coffee?"},
+  {"term": "because", "translation": "chunki", "example": "I stayed home because I was ill."},
+  {"term": "so", "translation": "shuning uchun", "example": "It was cold, so I wore a coat."},
+  {"term": "when", "translation": "qachon(ki), ...ganda", "example": "Call me when you get home."},
+  {"term": "before", "translation": "...dan oldin", "example": "Wash your hands before you eat."},
+  {"term": "after", "translation": "...dan keyin", "example": "We played football after school."},
+  {"term": "if", "translation": "agar", "example": "If it rains, we'll stay at home."},
+  {"term": "only", "translation": "faqat", "example": "I only have five dollars."},
+  {"term": "like", "translation": "...ga o'xshab, kabi", "example": "He looks like his brother."},
+  {"term": "than", "translation": "...dan (qiyoslashda)", "example": "My sister is taller than me."},
+  {"term": "also", "translation": "ham, shuningdek", "example": "She speaks English and also French."},
+  {"term": "too", "translation": "ham", "example": "I like pizza too."},
+  {"term": "as well", "translation": "ham", "example": "He plays the guitar as well."}
+]

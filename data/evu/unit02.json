@@ -1,0 +1,21 @@
+[
+  {"term": "have a baby", "translation": "farzand ko'rmoq", "example": "My sister had a baby last week."},
+  {"term": "be born", "translation": "tug'ilmoq", "example": "I was born in Tashkent."},
+  {"term": "weigh", "translation": "og'irligi ... bo'lmoq, tortmoq", "example": "The baby weighed three kilos."},
+  {"term": "call (someone) after", "translation": "(birovning) ismini qo'ymoq", "example": "They called their son after his grandfather."},
+  {"term": "birthday", "translation": "tug'ilgan kun", "example": "My birthday is in May."},
+  {"term": "single", "translation": "bo'ydoq, turmush qurmagan", "example": "My brother is thirty and still single."},
+  {"term": "married", "translation": "uylangan, turmushga chiqqan", "example": "Are you married?"},
+  {"term": "get married", "translation": "turmush qurmoq, uylanmoq", "example": "They got married last summer."},
+  {"term": "separated", "translation": "ajrashib alohida yashaydigan", "example": "Her parents are separated now."},
+  {"term": "divorced", "translation": "ajrashgan", "example": "He is divorced and lives alone."},
+  {"term": "widowed", "translation": "beva qolgan", "example": "My grandmother is widowed."},
+  {"term": "wedding", "translation": "to'y", "example": "We danced a lot at the wedding."},
+  {"term": "bride", "translation": "kelin", "example": "The bride wore a white dress."},
+  {"term": "groom", "translation": "kuyov", "example": "The groom looked very happy."},
+  {"term": "honeymoon", "translation": "asal oyi", "example": "They went to Italy for their honeymoon."},
+  {"term": "ill", "translation": "kasal", "example": "My uncle is very ill."},
+  {"term": "die", "translation": "vafot etmoq, o'lmoq", "example": "His grandfather died last year."},
+  {"term": "die of", "translation": "...dan vafot etmoq", "example": "She died of cancer."},
+  {"term": "funeral", "translation": "dafn marosimi, janoza", "example": "Many people came to the funeral."}
+]

@@ -1,0 +1,9 @@
+[
+  {"term": "bring", "translation": "olib kelmoq", "example": "Please bring your book to class."},
+  {"term": "take", "translation": "olib ketmoq, olib bormoq", "example": "Take this letter to the post office."},
+  {"term": "bring somebody something", "translation": "kimgadir biror narsa olib kelmoq", "example": "Can you bring me a cup of tea?"},
+  {"term": "bring flowers", "translation": "gul olib kelmoq", "example": "He always brings flowers for his mother."},
+  {"term": "bring something back", "translation": "biror narsani qaytarib olib kelmoq", "example": "Please bring my pen back tomorrow."},
+  {"term": "take something with you", "translation": "biror narsani o'zingiz bilan olib ketmoq", "example": "Take some food with you for the trip."},
+  {"term": "bring a friend", "translation": "do'stni olib kelmoq", "example": "You can bring a friend to the party."}
+]

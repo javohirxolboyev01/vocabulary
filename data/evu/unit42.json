@@ -1,0 +1,14 @@
+[
+  {"term": "come", "translation": "kelmoq", "example": "Can you come to my party?"},
+  {"term": "go", "translation": "bormoq", "example": "I go to school by bus."},
+  {"term": "come in", "translation": "kirmoq, ichkariga kirmoq", "example": "Please come in and sit down."},
+  {"term": "come into", "translation": "(biror joyga) kirmoq", "example": "The teacher came into the classroom."},
+  {"term": "come out", "translation": "chiqmoq", "example": "The children came out to play."},
+  {"term": "come out of", "translation": "...dan chiqmoq", "example": "A man came out of the bank."},
+  {"term": "come back", "translation": "qaytib kelmoq", "example": "When will you come back?"},
+  {"term": "come back from", "translation": "...dan qaytib kelmoq", "example": "She came back from London last week."},
+  {"term": "come home", "translation": "uyga kelmoq, uyga qaytmoq", "example": "Dad comes home at six o'clock."},
+  {"term": "come from", "translation": "...dan bo'lmoq, ...dan kelmoq (vatani)", "example": "I come from Uzbekistan."},
+  {"term": "come along", "translation": "birga bormoq, qo'shilmoq", "example": "We're going to the park. Do you want to come along?"},
+  {"term": "come and see", "translation": "kelib ko'rmoq, mehmonga kelmoq", "example": "Come and see our new flat."}
+]

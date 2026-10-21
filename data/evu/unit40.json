@@ -1,0 +1,17 @@
+[
+  {"term": "What do you do?", "translation": "Kasbingiz nima?", "example": "What do you do? - I'm a teacher."},
+  {"term": "do the housework", "translation": "uy ishlarini qilmoq", "example": "I do the housework on Sunday."},
+  {"term": "do the gardening", "translation": "bog'da ishlamoq", "example": "My grandfather does the gardening every day."},
+  {"term": "do the washing", "translation": "kir yuvmoq", "example": "Who does the washing in your family?"},
+  {"term": "do the washing-up", "translation": "idish-tovoq yuvmoq", "example": "I cooked, so you can do the washing-up."},
+  {"term": "do your homework", "translation": "uy vazifasini bajarmoq", "example": "Do your homework before you watch TV."},
+  {"term": "do exercises", "translation": "mashq bajarmoq", "example": "I do some exercises every morning."},
+  {"term": "do business with", "translation": "...bilan biznes qilmoq", "example": "We do business with companies in China."},
+  {"term": "do your best", "translation": "qo'lingdan kelganicha harakat qilmoq", "example": "It's a hard test, but do your best."},
+  {"term": "do nothing", "translation": "hech narsa qilmaslik", "example": "On holiday I want to do nothing."},
+  {"term": "Don't do that!", "translation": "Bunday qilma!", "example": "Don't do that! It's dangerous."},
+  {"term": "What are you doing?", "translation": "Nima qilyapsan?", "example": "What are you doing? - I'm cooking."},
+  {"term": "Yes, I do.", "translation": "Ha (qisqa javob)", "example": "Do you like tea? - Yes, I do."},
+  {"term": "So do I.", "translation": "Men ham.", "example": "I like football. - So do I."},
+  {"term": "do the shopping", "translation": "bozor-o'char qilmoq", "example": "My mother does the shopping on Fridays."}
+]

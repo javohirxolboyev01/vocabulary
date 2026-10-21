@@ -1,0 +1,23 @@
+[
+  {"term": "walk", "translation": "piyoda yurmoq", "example": "I walk to school every day."},
+  {"term": "run", "translation": "yugurmoq", "example": "The children ran to the park."},
+  {"term": "jump", "translation": "sakramoq", "example": "The cat jumped onto the table."},
+  {"term": "dance", "translation": "raqs tushmoq", "example": "We danced all night at the wedding."},
+  {"term": "swim", "translation": "suzmoq", "example": "Can you swim in the sea?"},
+  {"term": "climb", "translation": "tirmashib chiqmoq, chiqmoq", "example": "They climbed the mountain last summer."},
+  {"term": "fall", "translation": "yiqilmoq, tushmoq", "example": "Be careful, don't fall!"},
+  {"term": "go by", "translation": "...da bormoq (transport bilan)", "example": "We went to Bukhara by train."},
+  {"term": "take a taxi", "translation": "taksiga o'tirib bormoq", "example": "I took a taxi to the airport."},
+  {"term": "take the bus", "translation": "avtobusda bormoq", "example": "She takes the bus to work."},
+  {"term": "ride a bike", "translation": "velosiped haydamoq", "example": "I ride my bike in the park."},
+  {"term": "ride a horse", "translation": "ot minmoq", "example": "Can you ride a horse?"},
+  {"term": "ride a motorbike", "translation": "mototsikl haydamoq", "example": "My brother rides a motorbike to work."},
+  {"term": "drive a car", "translation": "mashina haydamoq", "example": "My mother drives a car very well."},
+  {"term": "fly", "translation": "uchmoq, samolyotda bormoq", "example": "We flew to Istanbul last year."},
+  {"term": "carry", "translation": "ko'tarib olib yurmoq", "example": "Can you help me carry this bag?"},
+  {"term": "pass", "translation": "uzatmoq", "example": "Can you pass me the bread, please?"},
+  {"term": "miss the train", "translation": "poyezddan qolmoq", "example": "Hurry up or we'll miss the train!"},
+  {"term": "catch the train", "translation": "poyezdga ulgurmoq", "example": "We ran and caught the train."},
+  {"term": "arrive at", "translation": "...ga yetib kelmoq (aniq joyga)", "example": "We arrived at the station at nine."},
+  {"term": "arrive in", "translation": "...ga yetib kelmoq (shahar, mamlakat)", "example": "They arrived in Tashkent yesterday."}
+]

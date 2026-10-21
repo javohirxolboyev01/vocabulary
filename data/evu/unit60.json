@@ -1,0 +1,22 @@
+[
+  {"term": "quite", "translation": "ancha, birmuncha", "example": "The test was quite easy."},
+  {"term": "quiet", "translation": "tinch, jim", "example": "Please be quiet in the library."},
+  {"term": "lose", "translation": "yo'qotmoq", "example": "Don't lose your ticket."},
+  {"term": "loose", "translation": "keng, bo'sh", "example": "This shirt is too loose for me."},
+  {"term": "fell", "translation": "yiqildi (fall o'tgan zamoni)", "example": "He fell off his bike yesterday."},
+  {"term": "felt", "translation": "his qildi (feel o'tgan zamoni)", "example": "I felt tired after work."},
+  {"term": "fall", "translation": "yiqilmoq", "example": "Be careful, don't fall!"},
+  {"term": "feel", "translation": "his qilmoq", "example": "I feel happy today."},
+  {"term": "cook", "translation": "oshpaz", "example": "My uncle is a cook in a hotel."},
+  {"term": "cooker", "translation": "plita", "example": "Our new cooker is electric."},
+  {"term": "lend", "translation": "qarzga bermoq", "example": "Can you lend me your pen?"},
+  {"term": "borrow", "translation": "qarzga olmoq", "example": "Can I borrow your dictionary?"},
+  {"term": "check", "translation": "tekshirmoq", "example": "Please check your answers."},
+  {"term": "control", "translation": "boshqarmoq", "example": "You control this game with the keyboard."},
+  {"term": "afternoon", "translation": "tushdan keyin, kunduzi", "example": "I have a meeting in the afternoon."},
+  {"term": "evening", "translation": "kechqurun", "example": "We have dinner in the evening."},
+  {"term": "night", "translation": "tun", "example": "I can't sleep at night."},
+  {"term": "wait for", "translation": "kutmoq", "example": "We are waiting for a taxi."},
+  {"term": "hope", "translation": "umid qilmoq", "example": "I hope you feel better soon."},
+  {"term": "expect", "translation": "kutmoq, taxmin qilmoq", "example": "I expect it will rain tomorrow."}
+]

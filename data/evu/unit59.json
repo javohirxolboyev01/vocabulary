@@ -1,0 +1,18 @@
+[
+  {"term": "suffix", "translation": "qo'shimcha (so'z oxirida)", "example": "\"Ful\" is a suffix in \"useful\"."},
+  {"term": "worker", "translation": "ishchi", "example": "My father is a factory worker."},
+  {"term": "swimmer", "translation": "suzuvchi", "example": "She is a fast swimmer."},
+  {"term": "instructor", "translation": "murabbiy, o'qituvchi", "example": "My driving instructor is very patient."},
+  {"term": "cooker", "translation": "plita", "example": "We cook on a gas cooker."},
+  {"term": "calculator", "translation": "kalkulyator", "example": "Can I use a calculator in the test?"},
+  {"term": "useful", "translation": "foydali", "example": "This dictionary is very useful."},
+  {"term": "beautiful", "translation": "chiroyli", "example": "What a beautiful garden!"},
+  {"term": "useless", "translation": "foydasiz", "example": "This old phone is useless now."},
+  {"term": "endless", "translation": "cheksiz, tugamaydigan", "example": "The road across the desert seemed endless."},
+  {"term": "quickly", "translation": "tez, tezda", "example": "She ate her breakfast quickly."},
+  {"term": "happily", "translation": "baxtli, xursand holda", "example": "The children played happily in the park."},
+  {"term": "happiness", "translation": "baxt", "example": "Money can't buy happiness."},
+  {"term": "sadness", "translation": "qayg'u, g'am", "example": "I felt great sadness when my dog died."},
+  {"term": "sandy", "translation": "qumli", "example": "We walked along the sandy beach."},
+  {"term": "sunny", "translation": "quyoshli", "example": "It's a sunny day today."}
+]

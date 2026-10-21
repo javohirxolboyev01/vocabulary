@@ -1,0 +1,19 @@
+[
+  {"term": "get tired", "translation": "charchamoq", "example": "I get tired after a long day."},
+  {"term": "get wet", "translation": "ho'l bo'lmoq", "example": "Take an umbrella or you'll get wet."},
+  {"term": "get dark", "translation": "qorong'i tushmoq", "example": "In winter it gets dark early."},
+  {"term": "get better", "translation": "tuzalmoq, yaxshilanmoq", "example": "I hope you get better soon."},
+  {"term": "get cold", "translation": "sovuq bo'lmoq, sovumoq", "example": "Eat your soup before it gets cold."},
+  {"term": "get a stamp", "translation": "marka olmoq (sotib olmoq)", "example": "I need to get a stamp for this letter."},
+  {"term": "get a newspaper", "translation": "gazeta olmoq", "example": "Dad goes out to get a newspaper."},
+  {"term": "get a drink", "translation": "ichimlik olmoq", "example": "Let's get a drink after class."},
+  {"term": "get a taxi", "translation": "taksi topmoq", "example": "We can get a taxi outside the hotel."},
+  {"term": "get a job", "translation": "ish topmoq", "example": "My sister wants to get a job in a bank."},
+  {"term": "get a doctor", "translation": "shifokor chaqirmoq", "example": "He feels very ill. Please get a doctor!"},
+  {"term": "get married", "translation": "turmush qurmoq, uylanmoq", "example": "They are getting married next summer."},
+  {"term": "get to", "translation": "...ga yetib bormoq", "example": "Call me when you get to the hotel."},
+  {"term": "get back", "translation": "qaytmoq", "example": "When do you get back from your holiday?"},
+  {"term": "get home", "translation": "uyga yetib bormoq", "example": "I usually get home at seven."},
+  {"term": "get there", "translation": "u yerga yetib bormoq", "example": "We got there before lunch."},
+  {"term": "get up", "translation": "o'rnidan turmoq", "example": "I get up at seven every day."}
+]

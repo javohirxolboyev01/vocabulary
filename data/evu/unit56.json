@@ -1,0 +1,22 @@
+[
+  {"term": "good", "translation": "yaxshi", "example": "This is a good book."},
+  {"term": "very good", "translation": "juda yaxshi", "example": "Your English is very good."},
+  {"term": "nice", "translation": "yoqimli, chiroyli", "example": "What a nice dress!"},
+  {"term": "lovely", "translation": "ajoyib, yoqimli", "example": "We had a lovely time at the party."},
+  {"term": "great", "translation": "zo'r, ajoyib", "example": "The concert was great!"},
+  {"term": "wonderful", "translation": "ajoyib, g'aroyib", "example": "The view from the hill is wonderful."},
+  {"term": "excellent", "translation": "a'lo, juda zo'r", "example": "She got an excellent mark in the exam."},
+  {"term": "perfect", "translation": "mukammal, ayni muddao", "example": "The weather is perfect for a picnic."},
+  {"term": "bad", "translation": "yomon", "example": "I have some bad news."},
+  {"term": "very bad", "translation": "juda yomon", "example": "The film was very bad."},
+  {"term": "dreadful", "translation": "dahshatli", "example": "There was a dreadful noise outside."},
+  {"term": "horrible", "translation": "jirkanch, juda yomon", "example": "This medicine tastes horrible."},
+  {"term": "terrible", "translation": "dahshatli, juda yomon", "example": "I have a terrible headache."},
+  {"term": "awful", "translation": "juda yomon, dahshatli", "example": "The food at the hotel was awful."},
+  {"term": "not bad", "translation": "yomon emas", "example": "Your new phone is not bad!"},
+  {"term": "How awful!", "translation": "Qanday dahshat!", "example": "You lost your bag? How awful!"},
+  {"term": "How horrible!", "translation": "Qanday yomon!", "example": "He fell in the river? How horrible!"},
+  {"term": "How nice!", "translation": "Qanday yaxshi!", "example": "You got flowers? How nice!"},
+  {"term": "How wonderful!", "translation": "Qanday ajoyib!", "example": "You passed your exam? How wonderful!"},
+  {"term": "How lovely!", "translation": "Qanday yoqimli!", "example": "A new baby? How lovely!"}
+]

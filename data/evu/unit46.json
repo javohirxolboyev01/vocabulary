@@ -1,0 +1,14 @@
+[
+  {"term": "get up", "translation": "o'rnidan turmoq", "example": "What time do you get up?"},
+  {"term": "get on", "translation": "(transportga) chiqmoq", "example": "Get on the bus quickly!"},
+  {"term": "get off", "translation": "(transportdan) tushmoq", "example": "We get off at the next stop."},
+  {"term": "turn on", "translation": "yoqmoq", "example": "Can you turn on the light, please?"},
+  {"term": "turn off", "translation": "o'chirmoq", "example": "Turn off your phone in class."},
+  {"term": "turn up", "translation": "(ovozni) balandlatmoq", "example": "Please turn up the radio, I can't hear it."},
+  {"term": "turn down", "translation": "(ovozni) pasaytirmoq; rad etmoq", "example": "Turn down the music, it's late."},
+  {"term": "go on", "translation": "davom etmoq", "example": "Go on, tell me the rest of the story."},
+  {"term": "go off", "translation": "ketib qolmoq", "example": "He went off without saying goodbye."},
+  {"term": "put on", "translation": "kiymoq", "example": "Put on your hat, it's cold."},
+  {"term": "come on", "translation": "tezroq!, qani!", "example": "Come on, the film is starting!"},
+  {"term": "take off", "translation": "(samolyot) uchib ketmoq; yechmoq", "example": "Please take off your shoes at the door."}
+]

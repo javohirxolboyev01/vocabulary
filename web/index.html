@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="uz">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0b0a1a">
+  <title>Vocab</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Unbounded:wght@500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="aurora" aria-hidden="true"><span></span><span></span><span></span></div>
+
+  <main>
+    <!-- Asosiy: kitoblar javoni -->
+    <section id="view-home" class="view">
+      <header class="hello">
+        <div>
+          <p id="greeting" class="eyebrow">Salom</p>
+          <h1>Bugun nimani <span class="grad-text">o'rganamiz?</span></h1>
+        </div>
+        <div class="streak-chip" title="Ketma-ket kunlar"><i data-lucide="flame" class="flame"></i><b id="home-streak">0</b></div>
+      </header>
+
+      <article class="hero glass">
+        <div class="ring">
+          <svg viewBox="0 0 120 120" aria-hidden="true">
+            <defs>
+              <linearGradient id="ring-grad" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stop-color="#8b6cff"/><stop offset=".6" stop-color="#ff5ca8"/><stop offset="1" stop-color="#ffb347"/>
+              </linearGradient>
+            </defs>
+            <circle class="ring-track" cx="60" cy="60" r="52"/>
+            <circle id="goal-ring" class="ring-fill" cx="60" cy="60" r="52"/>
+          </svg>
+          <div class="ring-label"><b id="goal-count">0</b><span>/ <i id="goal-total">20</i></span></div>
+        </div>
+        <div class="hero-text">
+          <p class="eyebrow">Bugungi maqsad</p>
+          <h2 id="hero-title">Takrorlash vaqti</h2>
+          <p id="hero-sub" class="muted"></p>
+          <button id="hero-btn" class="btn btn-grad" type="button"><i data-lucide="play"></i><span>Boshlash</span></button>
+        </div>
+      </article>
+
+      <div class="quick">
+        <div class="quick-item glass"><i data-lucide="circle-check" class="ic-ok"></i><b id="q-known">0</b><small>bilaman</small></div>
+        <div class="quick-item glass"><i data-lucide="circle-x" class="ic-no"></i><b id="q-unknown">0</b><small>bilmayman</small></div>
+        <div class="quick-item glass"><i data-lucide="trophy" class="ic-gold"></i><b id="q-mastered">0</b><small>yodlangan</small></div>
+      </div>
+
+      <div class="section-head">
+        <p class="eyebrow">Kutubxona</p>
+        <h2>Kitoblarim</h2>
+      </div>
+      <div id="shelf" class="shelf"></div>
+    </section>
+
+    <!-- Kitob: bo'limlar -->
+    <section id="view-book" class="view">
+      <button class="back-btn" type="button" data-back="#/"><i data-lucide="arrow-left"></i>Kitoblar</button>
+      <article class="book-hero">
+        <div id="book-cover" class="cover cover-lg"></div>
+        <div class="book-hero-text">
+          <p id="book-level" class="eyebrow"></p>
+          <h1 id="book-title"></h1>
+          <p id="book-author" class="muted"></p>
+          <div class="book-stats">
+            <span><b id="book-units-done">0</b> / <i id="book-units-total">0</i> bo'lim</span>
+            <span><b id="book-words-done">0</b> / <i id="book-words-total">0</i> so'z</span>
+          </div>
+          <div class="bar"><span id="book-bar"></span></div>
+          <button id="book-continue" class="btn btn-grad" type="button"><i data-lucide="play"></i><span>Davom ettirish</span></button>
+        </div>
+      </article>
+      <div id="units"></div>
+    </section>
+
+    <!-- Bo'lim: so'zlar bilaman / bilmayman bo'yicha -->
+    <section id="view-unit" class="view">
+      <button id="unit-back" class="back-btn" type="button"><i data-lucide="arrow-left"></i>Bo'limlar</button>
+      <article id="unit-hero" class="unit-hero glass">
+        <span id="unit-num" class="unit-hero-num">1</span>
+        <div class="unit-hero-text">
+          <h1 id="unit-title"></h1>
+          <p id="unit-sub" class="muted"></p>
+        </div>
+      </article>
+
+      <div class="split">
+        <button type="button" class="split-item split-ok" data-seg="ok"><i data-lucide="circle-check"></i><b id="unit-ok">0</b><small>Bilaman</small></button>
+        <button type="button" class="split-item split-no" data-seg="no"><i data-lucide="circle-x"></i><b id="unit-no">0</b><small>Bilmayman</small></button>
+        <button type="button" class="split-item split-new" data-seg="new"><i data-lucide="sparkles"></i><b id="unit-new">0</b><small>Yangi</small></button>
+      </div>
+
+      <div class="unit-actions">
+        <button id="unit-start" class="btn btn-grad" type="button"><i data-lucide="play"></i><span>Boshlash</span></button>
+        <button id="unit-retry" class="btn btn-danger-soft" type="button"><i data-lucide="rotate-ccw"></i><span>Bilmaganlarim</span></button>
+      </div>
+
+      <div id="unit-seg" class="segmented">
+        <button type="button" data-seg="all" class="active">Hammasi</button>
+        <button type="button" data-seg="ok">Bilaman</button>
+        <button type="button" data-seg="no">Bilmayman</button>
+        <button type="button" data-seg="new">Yangi</button>
+      </div>
+      <ul id="unit-words" class="word-list"></ul>
+    </section>
+
+    <!-- Lug'at -->
+    <section id="view-words" class="view">
+      <header class="page-head">
+        <h1>Lug'at</h1>
+        <button id="open-add" class="btn btn-grad btn-sm" type="button"><i data-lucide="plus"></i><span>So'z</span></button>
+      </header>
+      <div class="search glass">
+        <i data-lucide="search"></i>
+        <input id="search" type="search" placeholder="Inglizcha yoki o'zbekcha qidiring…" autocomplete="off">
+      </div>
+      <div id="filters" class="chips">
+        <button type="button" class="chip active" data-filter="all">Hammasi</button>
+        <button type="button" class="chip chip-ok" data-filter="ok"><i data-lucide="circle-check"></i>Bilaman</button>
+        <button type="button" class="chip chip-no" data-filter="no"><i data-lucide="circle-x"></i>Bilmayman</button>
+        <button type="button" class="chip" data-filter="due"><i data-lucide="clock"></i>Navbatda</button>
+        <button type="button" class="chip" data-filter="new"><i data-lucide="sparkles"></i>Yangi</button>
+        <button type="button" class="chip" data-filter="mine"><i data-lucide="pencil"></i>Mening so'zlarim</button>
+      </div>
+      <p id="words-meta" class="muted small"></p>
+      <ul id="word-list" class="word-list"></ul>
+    </section>
+
+    <!-- Statistika -->
+    <section id="view-stats" class="view">
+      <header class="page-head"><h1>Statistika</h1></header>
+
+      <div class="tiles">
+        <div class="tile glass"><i data-lucide="flame" class="ic-fire"></i><b id="st-streak">0</b><small>kun ketma-ket</small></div>
+        <div class="tile glass"><i data-lucide="clock" class="ic-blue"></i><b id="st-due">0</b><small>navbatda</small></div>
+        <div class="tile glass"><i data-lucide="circle-check" class="ic-ok"></i><b id="st-known">0</b><small>bilaman</small></div>
+        <div class="tile glass"><i data-lucide="circle-x" class="ic-no"></i><b id="st-unknown">0</b><small>bilmayman</small></div>
+      </div>
+
+      <h3 class="section-title">So'nggi 7 kun</h3>
+      <div id="week" class="week glass"></div>
+
+      <h3 class="section-title">Leitner qutilari</h3>
+      <div id="boxes" class="boxes glass"></div>
+      <p class="muted small">1-quti har kuni, 7-quti 4 oyda bir takrorlanadi. 7-qutidagilar yodlangan hisoblanadi.</p>
+
+      <h3 class="section-title">Zaxira nusxa</h3>
+      <div class="backup">
+        <button id="export" class="btn btn-glass" type="button"><i data-lucide="file-down"></i><span>PDF yuklab olish</span></button>
+        <button id="import" class="btn btn-glass" type="button"><i data-lucide="upload"></i><span>Tiklash</span></button>
+        <input id="import-file" type="file" accept="application/pdf,.pdf,application/json,.json" hidden>
+      </div>
+      <p class="muted small">Progress shu brauzerda saqlanadi. Boshqa qurilmaga o'tkazish yoki yo'qolib qolmasligi uchun vaqti-vaqti bilan zaxira oling.</p>
+    </section>
+  </main>
+
+  <nav class="dock glass">
+    <a href="#/" data-nav="home" class="active"><i data-lucide="house"></i>Asosiy</a>
+    <button type="button" id="dock-review" class="dock-cta"><i data-lucide="zap"></i>Takrorlash<em id="dock-badge" hidden>0</em></button>
+    <a href="#/words" data-nav="words"><i data-lucide="book-open"></i>Lug'at</a>
+    <a href="#/stats" data-nav="stats"><i data-lucide="chart-column"></i>Statistika</a>
+  </nav>
+
+  <!-- O'rganish sessiyasi -->
+  <div id="study" class="study" hidden>
+    <div id="flash" class="flash" aria-hidden="true"></div>
+    <header class="study-top">
+      <button id="study-close" class="icon-btn" type="button" aria-label="Yopish"><i data-lucide="x"></i></button>
+      <div class="study-title">
+        <strong id="study-title"></strong>
+        <div class="bar"><span id="study-bar"></span></div>
+      </div>
+      <span id="study-count" class="study-count">0/0</span>
+    </header>
+    <div class="tally">
+      <span class="tally-ok"><i data-lucide="check"></i><b id="tally-ok">0</b> bilaman</span>
+      <span class="tally-no"><i data-lucide="x"></i><b id="tally-no">0</b> bilmayman</span>
+    </div>
+
+    <div class="stage">
+      <div id="card" class="swipe">
+        <div class="card-inner">
+          <div class="face front">
+            <div class="face-top"><span id="card-chip" class="chip-mini"></span><span id="card-box" class="chip-mini"></span></div>
+            <div id="card-term" class="term"></div>
+            <p class="tap-hint"><i data-lucide="hand"></i>Aylantirish uchun bosing · surib javob bering</p>
+          </div>
+          <div class="face back">
+            <div class="face-top"><span class="chip-mini">Tarjima</span></div>
+            <div id="card-term-back" class="term-small"></div>
+            <div id="card-translation" class="translation"></div>
+            <p id="card-example" class="example"></p>
+          </div>
+        </div>
+        <div class="stamp stamp-ok">BILAMAN</div>
+        <div class="stamp stamp-no">BILMAYMAN</div>
+      </div>
+    </div>
+
+    <div class="controls">
+      <button id="btn-no" class="round round-no" type="button" aria-label="Bilmayman"><span><i data-lucide="x"></i></span><small>Bilmayman</small></button>
+      <button id="btn-flip" class="round round-mini" type="button" aria-label="Aylantirish"><span><i data-lucide="rotate-cw"></i></span><small>Aylantirish</small></button>
+      <button id="btn-speak" class="round round-mini" type="button" aria-label="Talaffuz"><span><i data-lucide="volume-2"></i></span><small>Tinglash</small></button>
+      <button id="btn-ok" class="round round-ok" type="button" aria-label="Bilaman"><span><i data-lucide="check"></i></span><small>Bilaman</small></button>
+    </div>
+  </div>
+
+  <!-- Tabrik -->
+  <div id="celebrate" class="celebrate" hidden>
+    <canvas id="fx" aria-hidden="true"></canvas>
+    <div class="rays" aria-hidden="true"></div>
+    <div class="cel-body">
+      <div class="medal-wrap">
+        <div class="medal-orbit" aria-hidden="true"><i data-lucide="star"></i><i data-lucide="sparkles"></i><i data-lucide="star"></i></div>
+        <div class="medal"><i id="cel-icon" data-lucide="trophy"></i></div>
+        <div id="cel-ribbon" class="ribbon">Bo'lim tugallandi</div>
+      </div>
+      <h2 id="cel-title" class="cel-title"></h2>
+      <p id="cel-sub" class="muted"></p>
+      <div id="cel-stars" class="stars">
+        <i data-lucide="star"></i><i data-lucide="star"></i><i data-lucide="star"></i>
+      </div>
+      <div class="cel-score">
+        <div class="score-ok"><b id="cel-ok">0</b><small>bilaman</small></div>
+        <div class="score-pct"><b id="cel-pct">0%</b><small>natija</small></div>
+        <div class="score-no"><b id="cel-no">0</b><small>bilmayman</small></div>
+      </div>
+      <div class="cel-lists">
+        <div id="cel-no-wrap" class="cel-list cel-list-no">
+          <p><i data-lucide="circle-x"></i>Takrorlash kerak</p>
+          <div id="cel-no-list" class="tags"></div>
+        </div>
+        <div id="cel-ok-wrap" class="cel-list cel-list-ok">
+          <p><i data-lucide="circle-check"></i>Bilganlarim</p>
+          <div id="cel-ok-list" class="tags"></div>
+        </div>
+      </div>
+      <div class="cel-actions">
+        <button id="cel-retry" class="btn btn-danger-soft" type="button"><i data-lucide="rotate-ccw"></i><span>Bilmaganlarimni takrorlash</span></button>
+        <button id="cel-next" class="btn btn-grad" type="button"><span>Keyingi bo'lim</span><i data-lucide="arrow-right"></i></button>
+        <button id="cel-close" class="btn btn-glass" type="button"><i data-lucide="layers"></i><span>Bo'limlarga</span></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- So'z qo'shish oynasi -->
+  <div id="sheet" class="sheet" hidden>
+    <div class="sheet-backdrop" data-close></div>
+    <form id="add-form" class="sheet-panel glass">
+      <div class="sheet-handle"></div>
+      <h2>Yangi so'z</h2>
+      <label class="field"><span>Inglizcha</span><input name="term" required maxlength="100" placeholder="sunflower" autocomplete="off"></label>
+      <label class="field"><span>Tarjima</span><input name="translation" required maxlength="200" placeholder="kungaboqar" autocomplete="off"></label>
+      <label class="field"><span>Misol gap (ixtiyoriy)</span><input name="example" maxlength="300" placeholder="Sunflowers follow the sun." autocomplete="off"></label>
+      <button class="btn btn-grad" type="submit"><i data-lucide="plus"></i><span>Qo'shish</span></button>
+    </form>
+  </div>
+
+  <div id="toast" class="toast" role="status" hidden></div>
+
+  <script src="vendor/lucide.min.js"></script>
+  <script src="vendor/jspdf.umd.min.js"></script>
+  <script src="packs.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

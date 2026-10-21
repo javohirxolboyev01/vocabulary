@@ -1,0 +1,18 @@
+[
+  {"term": "Good morning", "translation": "Xayrli tong", "example": "Good morning! Did you sleep well?"},
+  {"term": "Good afternoon", "translation": "Xayrli kun", "example": "Good afternoon, how can I help you?"},
+  {"term": "Good evening", "translation": "Xayrli kech", "example": "Good evening, everyone, and welcome."},
+  {"term": "Goodbye", "translation": "Xayr", "example": "Goodbye! See you on Monday."},
+  {"term": "See you soon!", "translation": "Tez orada ko'rishguncha!", "example": "Thanks for coming. See you soon!"},
+  {"term": "Goodnight", "translation": "Xayrli tun", "example": "Goodnight, Mum. I'm going to bed."},
+  {"term": "Sleep well", "translation": "Yaxshi uxlang", "example": "Goodnight and sleep well."},
+  {"term": "Please", "translation": "Iltimos", "example": "Can I have some tea, please?"},
+  {"term": "Thank you", "translation": "Rahmat", "example": "Thank you for the flowers."},
+  {"term": "Cheers!", "translation": "Salomatlik uchun! (qadah ko'targanda)", "example": "We lifted our glasses and said, \"Cheers!\""},
+  {"term": "Happy Birthday!", "translation": "Tug'ilgan kuningiz muborak!", "example": "Happy Birthday! Here's a present for you."},
+  {"term": "Merry Christmas!", "translation": "Rojdestvo muborak!", "example": "Merry Christmas to you and your family!"},
+  {"term": "Happy New Year!", "translation": "Yangi yilingiz muborak!", "example": "At midnight everyone shouted, \"Happy New Year!\""},
+  {"term": "Good luck!", "translation": "Omad yor bo'lsin!", "example": "You have an exam tomorrow? Good luck!"},
+  {"term": "Congratulations!", "translation": "Tabriklayman!", "example": "Congratulations on your new baby!"},
+  {"term": "Well done!", "translation": "Barakalla! Ofarin!", "example": "You got full marks? Well done!"}
+]

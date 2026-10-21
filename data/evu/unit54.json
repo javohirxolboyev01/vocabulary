@@ -1,0 +1,20 @@
+[
+  {"term": "manner", "translation": "tarz, uslub", "example": "She spoke in a calm manner."},
+  {"term": "fast", "translation": "tez", "example": "He is a very fast runner."},
+  {"term": "slow", "translation": "sekin", "example": "This computer is too slow."},
+  {"term": "slowly", "translation": "sekin, asta", "example": "Please speak more slowly."},
+  {"term": "loud", "translation": "baland (ovoz)", "example": "The TV is too loud."},
+  {"term": "loudly", "translation": "baland ovozda", "example": "The baby cried loudly."},
+  {"term": "quiet", "translation": "tinch, jim", "example": "The library is very quiet."},
+  {"term": "quietly", "translation": "sekin, ohista", "example": "She closed the door quietly."},
+  {"term": "good", "translation": "yaxshi", "example": "He is a good cook."},
+  {"term": "well", "translation": "yaxshi (ravish)", "example": "My sister sings very well."},
+  {"term": "bad", "translation": "yomon", "example": "This is a bad idea."},
+  {"term": "badly", "translation": "yomon (ravish)", "example": "I slept badly last night."},
+  {"term": "right", "translation": "to'g'ri", "example": "Your answer is right."},
+  {"term": "wrong", "translation": "noto'g'ri", "example": "Sorry, I took the wrong bus."},
+  {"term": "in a friendly way", "translation": "do'stona tarzda", "example": "The teacher smiled at us in a friendly way."},
+  {"term": "in an unfriendly way", "translation": "qo'pol, nodo'stona tarzda", "example": "The man looked at me in an unfriendly way."},
+  {"term": "the right way", "translation": "to'g'ri yo'l (usul)", "example": "This is the right way to hold a pen."},
+  {"term": "the wrong way", "translation": "noto'g'ri usulda", "example": "You are cutting the bread the wrong way."}
+]

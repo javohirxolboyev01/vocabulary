@@ -1,0 +1,17 @@
+[
+  {"term": "prefix", "translation": "old qo'shimcha", "example": "\"Un\" is a common prefix."},
+  {"term": "ex-wife", "translation": "sobiq xotin", "example": "His ex-wife lives in another city."},
+  {"term": "ex-boyfriend", "translation": "sobiq yigit", "example": "She met her ex-boyfriend at the shop."},
+  {"term": "half-price", "translation": "yarim narxda", "example": "These shoes are half-price today."},
+  {"term": "half-hour", "translation": "yarim soatlik", "example": "It's a half-hour walk to the station."},
+  {"term": "informal", "translation": "norasmiy", "example": "You can wear informal clothes to the party."},
+  {"term": "formal", "translation": "rasmiy", "example": "He wore a formal suit to the meeting."},
+  {"term": "impossible", "translation": "imkonsiz", "example": "It is impossible to finish this today."},
+  {"term": "non-smoking", "translation": "chekilmaydigan", "example": "We want a table in the non-smoking area."},
+  {"term": "pre-school", "translation": "maktabgacha", "example": "My son goes to a pre-school near our house."},
+  {"term": "pre-heat", "translation": "oldindan qizdirmoq", "example": "Pre-heat the oven before you bake the cake."},
+  {"term": "redo", "translation": "qayta qilmoq", "example": "I made a mistake, so I must redo my homework."},
+  {"term": "rewrite", "translation": "qayta yozmoq", "example": "Please rewrite this letter more clearly."},
+  {"term": "unhappy", "translation": "baxtsiz, xafa", "example": "He looks unhappy today."},
+  {"term": "unsafe", "translation": "xavfli", "example": "This old bridge is unsafe."}
+]

@@ -1,0 +1,23 @@
+[
+  {"term": "listen to", "translation": "tinglamoq", "example": "I listen to music on the bus."},
+  {"term": "wait for", "translation": "kutmoq", "example": "Please wait for me after class."},
+  {"term": "ask for", "translation": "so'ramoq", "example": "He asked for a glass of water."},
+  {"term": "pay for", "translation": "to'lamoq (...uchun)", "example": "Who will pay for the tickets?"},
+  {"term": "come to", "translation": "kelmoq (...ga)", "example": "Can you come to my birthday party?"},
+  {"term": "belong to", "translation": "tegishli bo'lmoq", "example": "This bag belongs to my sister."},
+  {"term": "think about", "translation": "o'ylamoq (...haqida)", "example": "I often think about my old school."},
+  {"term": "thank for", "translation": "minnatdorchilik bildirmoq (...uchun)", "example": "I thanked her for the help."},
+  {"term": "apologise for", "translation": "kechirim so'ramoq (...uchun)", "example": "He apologised for the mistake."},
+  {"term": "look at", "translation": "qaramoq", "example": "Look at this picture!"},
+  {"term": "look for", "translation": "qidirmoq", "example": "I'm looking for my glasses."},
+  {"term": "look after", "translation": "g'amxo'rlik qilmoq, qarab turmoq", "example": "Can you look after my cat this weekend?"},
+  {"term": "look forward to", "translation": "intiqlik bilan kutmoq", "example": "I'm looking forward to the holidays."},
+  {"term": "good at", "translation": "...ni yaxshi biladigan, ...da usta", "example": "My brother is good at maths."},
+  {"term": "bad at", "translation": "...ni yomon biladigan", "example": "I'm bad at drawing."},
+  {"term": "interested in", "translation": "...ga qiziqadigan", "example": "She is interested in history."},
+  {"term": "afraid of", "translation": "...dan qo'rqadigan", "example": "My little sister is afraid of dogs."},
+  {"term": "proud of", "translation": "...dan faxrlanadigan", "example": "Her parents are very proud of her."},
+  {"term": "used to", "translation": "...ga o'rgangan", "example": "I'm used to cold weather."},
+  {"term": "get used to", "translation": "...ga o'rganmoq, ko'nikmoq", "example": "It took me a month to get used to my new job."},
+  {"term": "happy about", "translation": "...dan xursand", "example": "We are happy about the good news."}
+]

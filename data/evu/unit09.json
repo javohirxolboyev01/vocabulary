@@ -1,0 +1,23 @@
+[
+  {"term": "actually", "translation": "aslida, haqiqatan", "example": "He looks serious, but actually he's very funny."},
+  {"term": "really", "translation": "juda, rostdan", "example": "This cake is really nice."},
+  {"term": "else", "translation": "yana, boshqa", "example": "Do you need anything else?"},
+  {"term": "around", "translation": "taxminan, atrofida", "example": "The bus comes at around eight."},
+  {"term": "anyway", "translation": "baribir, nima bo'lganda ham", "example": "I don't need a lift; I'm walking anyway."},
+  {"term": "Why don't we ...?", "translation": "Nega ... qilmaymiz? (taklif)", "example": "Why don't we have pizza tonight?"},
+  {"term": "Let's ...", "translation": "Keling, ... qilaylik", "example": "Let's go to the park."},
+  {"term": "I don't mind", "translation": "Menga farqi yo'q", "example": "Tea or coffee? I don't mind."},
+  {"term": "It's up to you", "translation": "O'zingiz hal qiling, sizga bog'liq", "example": "We can eat now or later. It's up to you."},
+  {"term": "How about ...?", "translation": "...sa-chi? (taklif)", "example": "How about going to the beach?"},
+  {"term": "What about ...?", "translation": "...sa-chi? (taklif)", "example": "What about watching a film tonight?"},
+  {"term": "Oh dear!", "translation": "Voy! Attang!", "example": "Oh dear! I've lost my keys."},
+  {"term": "It doesn't matter", "translation": "Hechqisi yo'q, muhim emas", "example": "You forgot the milk? It doesn't matter."},
+  {"term": "What a pity!", "translation": "Afsus!", "example": "You can't come? What a pity!"},
+  {"term": "Well done!", "translation": "Barakalla!", "example": "You won the game? Well done!"},
+  {"term": "Hurry up!", "translation": "Tezroq bo'l!", "example": "Hurry up! The train is leaving."},
+  {"term": "Look out!", "translation": "Ehtiyot bo'l! Qara!", "example": "Look out! There's a bike behind you."},
+  {"term": "Be careful!", "translation": "Ehtiyot bo'ling!", "example": "Be careful! The floor is wet."},
+  {"term": "Absolutely!", "translation": "Albatta! Mutlaqo to'g'ri!", "example": "Do you want ice cream? Absolutely!"},
+  {"term": "I agree", "translation": "Qo'shilaman", "example": "I agree with you. It's a great idea."},
+  {"term": "I don't agree", "translation": "Qo'shilmayman", "example": "I don't agree. I think it's too expensive."}
+]

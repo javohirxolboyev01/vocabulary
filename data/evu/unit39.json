@@ -1,0 +1,21 @@
+[
+  {"term": "go", "translation": "bormoq", "example": "I go to school every day."},
+  {"term": "go by car", "translation": "mashinada bormoq", "example": "We usually go by car to the village."},
+  {"term": "go by bike", "translation": "velosipedda bormoq", "example": "My sister goes to work by bike."},
+  {"term": "go in", "translation": "ichkariga kirmoq", "example": "She opened the door and went in."},
+  {"term": "go into", "translation": "...ga kirmoq", "example": "He went into the kitchen."},
+  {"term": "go out of", "translation": "...dan chiqmoq", "example": "The children went out of the classroom."},
+  {"term": "go up", "translation": "yuqoriga chiqmoq", "example": "Go up the stairs and turn left."},
+  {"term": "go down", "translation": "pastga tushmoq", "example": "She went down the hill slowly."},
+  {"term": "be going to", "translation": "...moqchi bo'lmoq (reja)", "example": "I'm going to visit my grandmother tomorrow."},
+  {"term": "go shopping", "translation": "xarid qilgani bormoq", "example": "We go shopping on Saturdays."},
+  {"term": "go sightseeing", "translation": "diqqatga sazovor joylarni ko'rgani bormoq", "example": "Let's go sightseeing in Samarkand."},
+  {"term": "go swimming", "translation": "suzgani bormoq", "example": "They go swimming in the summer."},
+  {"term": "go skiing", "translation": "chang'i uchgani bormoq", "example": "We go skiing in the mountains every winter."},
+  {"term": "go dancing", "translation": "raqsga bormoq", "example": "Do you want to go dancing tonight?"},
+  {"term": "go fishing", "translation": "baliq ovlagani bormoq", "example": "My father goes fishing at the weekend."},
+  {"term": "go home", "translation": "uyga bormoq", "example": "It's late. I want to go home."},
+  {"term": "go there", "translation": "u yerga bormoq", "example": "The park is nice. We often go there."},
+  {"term": "go anywhere", "translation": "biror joyga bormoq", "example": "I don't want to go anywhere today."},
+  {"term": "go somewhere else", "translation": "boshqa joyga bormoq", "example": "This café is full. Let's go somewhere else."}
+]

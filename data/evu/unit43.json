@@ -1,0 +1,17 @@
+[
+  {"term": "it takes", "translation": "(vaqt) ketadi, oladi", "example": "It takes ten minutes to walk to school."},
+  {"term": "how long does it take", "translation": "qancha vaqt ketadi", "example": "How long does it take to get to the airport?"},
+  {"term": "take something with you", "translation": "biror narsani o'zingiz bilan olmoq", "example": "Take a jacket with you, it's cold."},
+  {"term": "take an umbrella", "translation": "soyabon olmoq", "example": "It's raining, so take an umbrella."},
+  {"term": "take a photo", "translation": "surat olmoq", "example": "Can I take a photo of you?"},
+  {"term": "take a photograph", "translation": "suratga olmoq", "example": "He took a photograph of the mountains."},
+  {"term": "take a course", "translation": "kursda o'qimoq", "example": "I'm taking a computer course this year."},
+  {"term": "take an exam", "translation": "imtihon topshirmoq", "example": "We take an exam in June."},
+  {"term": "take lessons", "translation": "dars olmoq", "example": "She takes piano lessons on Fridays."},
+  {"term": "take the bus", "translation": "avtobusda bormoq", "example": "I take the bus to work."},
+  {"term": "take the underground", "translation": "metroda bormoq", "example": "We took the underground to the city centre."},
+  {"term": "take a taxi", "translation": "taksida bormoq", "example": "Let's take a taxi to the station."},
+  {"term": "take the train", "translation": "poyezdda bormoq", "example": "My brother takes the train every morning."},
+  {"term": "take a look at", "translation": "qarab chiqmoq, ko'zdan kechirmoq", "example": "Can you take a look at my car?"},
+  {"term": "take a chance", "translation": "tavakkal qilmoq", "example": "Sometimes you have to take a chance."}
+]
