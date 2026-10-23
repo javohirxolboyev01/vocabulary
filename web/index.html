@@ -2,7 +2,7 @@
 <html lang="uz">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#0b0a1a">
   <meta name="description" content="Inglizcha so'zlarni Leitner tizimi bilan yodlash: kartochkalar va yozish mashqi.">
   <title>Vocab</title>
@@ -274,7 +274,11 @@
       </article>
 
       <form id="w-form" class="write-form" autocomplete="off" novalidate>
-        <input id="w-input" class="write-input" type="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="done" aria-label="Javob">
+        <div class="write-field">
+          <input id="w-input" class="write-input" type="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="done" aria-label="Javob">
+          <button id="w-mic" class="mic-btn" type="button" aria-label="Ovoz bilan javob berish" hidden><i data-lucide="mic"></i></button>
+        </div>
+        <p id="w-listen" class="write-listen" aria-live="polite" hidden><span class="listen-dot"></span>Tinglayapman… tarjimani ayting</p>
         <p id="w-hint" class="write-hint" aria-live="polite"></p>
         <div id="w-feedback" class="write-feedback" role="status" hidden>
           <div id="wf-head" class="wf-head"></div>
@@ -290,7 +294,7 @@
           <button id="w-override" class="btn btn-glass" type="button"><i data-lucide="check"></i><span>Men to'g'ri yozdim</span></button>
           <button id="w-next" class="btn btn-grad" type="button"><span>Davom etish</span><i data-lucide="arrow-right"></i></button>
         </div>
-        <p class="write-keys">Enter — tekshirish / davom etish · Esc — chiqish</p>
+        <p class="write-keys">Enter — tekshirish / davom etish · 🎤 — ovoz bilan javob · Esc — chiqish</p>
       </form>
     </div>
   </div>

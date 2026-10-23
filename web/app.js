@@ -314,12 +314,51 @@ function setWidth(node, ratio) {
   requestAnimationFrame(() => (node.style.width = `${Math.max(0, Math.min(1, ratio)) * 100}%`));
 }
 
-function speak(text) {
+// --- Talaffuz: qurilmadagi eng tabiiy inglizcha ovoz tanlanadi ---
+// Brauzerlarda ovozlar sifati har xil: Edge "Natural", Apple "Premium/Enhanced", Chrome "Google" ovozlari
+// odamnikiga yaqin; macOS dagi "Zarvox", "Bubbles" kabi o'yinchoq ovozlar umuman olinmaydi.
+
+const NICE_VOICES = /\b(ava|samantha|zoe|allison|susan|serena|aria|jenny|michelle|emma|libby|sonia|daniel|karen|moira|tessa)\b/i;
+const TOY_VOICES = /\b(albert|bad news|bahh|bells|boing|bubbles|cellos|good news|jester|organ|superstar|trinoids|whisper|wobble|zarvox|fred|junior|ralph|kathy|grandma|grandpa|eddy|flo|reed|rocko|sandy|shelley)\b/i;
+let bestVoice = null;
+
+function voiceScore(v) {
+  if (!/^en[-_]/i.test(v.lang) || TOY_VOICES.test(v.name)) return -1;
+  let score = /^en[-_]us/i.test(v.lang) ? 10 : /^en[-_]gb/i.test(v.lang) ? 8 : 0;
+  if (/natural|neural/i.test(v.name)) score += 60;
+  if (/premium/i.test(v.name)) score += 50;
+  if (/enhanced/i.test(v.name)) score += 40;
+  if (/google/i.test(v.name)) score += 30;
+  if (NICE_VOICES.test(v.name)) score += 20;
+  if (v.default) score += 2;
+  return score;
+}
+
+function pickVoice() {
   if (!("speechSynthesis" in window)) return;
+  const ranked = speechSynthesis.getVoices().filter((v) => voiceScore(v) >= 0).sort((a, b) => voiceScore(b) - voiceScore(a));
+  bestVoice = ranked[0] ?? null;
+}
+if ("speechSynthesis" in window) {
+  pickVoice();
+  speechSynthesis.addEventListener?.("voiceschanged", pickVoice); // Chrome ovozlarni kechroq yuklaydi
+}
+
+/** btn berilsa, ovoz aytilayotganda karnay belgisi "jonlanadi" */
+function speak(text, btn) {
+  if (!("speechSynthesis" in window)) return;
+  if (!bestVoice) pickVoice();
   const utterance = new SpeechSynthesisUtterance(text);
-  utterance.lang = "en-US";
-  utterance.rate = 0.9;
+  utterance.lang = bestVoice?.lang ?? "en-US";
+  if (bestVoice) utterance.voice = bestVoice;
+  utterance.rate = 0.88;
+  utterance.pitch = 1;
   speechSynthesis.cancel();
+  document.querySelectorAll(".speaking").forEach((n) => n.classList.remove("speaking"));
+  if (btn) {
+    btn.classList.add("speaking");
+    utterance.onend = utterance.onerror = () => btn.classList.remove("speaking");
+  }
   speechSynthesis.speak(utterance);
 }
 
@@ -578,11 +617,11 @@ function soonCard(book, i) {
 
   const cover = coverEl(book);
   const ribbon = el("span", "soon-ribbon");
-  ribbon.append(ic("clock"), "Tez orada");
+  ribbon.append(ic("clock"), "Tez kunda");
   cover.append(ribbon);
 
   const pill = el("span", "soon-pill");
-  pill.append(ic("lock"), "Tez orada qo'shiladi");
+  pill.append(ic("lock"), "Tez kunda qo'shiladi");
   const main = el("div", "book-main");
   main.append(el("p", "eyebrow", book.level), el("h3", "", book.title), el("p", "muted small", book.author), pill);
 
@@ -742,7 +781,7 @@ function wordRow(w, i) {
   say.type = "button";
   say.setAttribute("aria-label", "Talaffuz");
   say.append(ic("volume-2"));
-  say.addEventListener("click", () => speak(w.term));
+  say.addEventListener("click", () => speak(w.term, say));
 
   li.append(state, main, side, say);
   return li;
@@ -901,7 +940,7 @@ $("btn-no").addEventListener("click", () => answer(false));
 $("btn-flip").addEventListener("click", flipCard);
 $("btn-speak").addEventListener("click", () => {
   const w = WORDS.get(session.ids[session.i]);
-  if (w) speak(w.term);
+  if (w) speak(w.term, $("btn-speak"));
 });
 $("study-close").addEventListener("click", closeStudy);
 
@@ -1184,6 +1223,8 @@ function showWriteCard() {
   input.placeholder = dir.placeholder;
   input.lang = session.dir;
   $("w-hint").textContent = "";
+  stopListening();
+  $("w-mic").disabled = false;
   $("w-feedback").hidden = true;
   $("w-ask-actions").hidden = false;
   $("w-after-actions").hidden = true;
@@ -1232,6 +1273,7 @@ function showFeedback() {
   $("w-override").hidden = verdict !== "no";
   $("w-after-actions").classList.toggle("single", verdict !== "no");
   icons();
+  $("w-after-actions").scrollIntoView({ block: "nearest" });
 }
 
 function checkWrite() {
@@ -1249,6 +1291,8 @@ function checkWrite() {
 function revealWrite(verdict, input = "", best = "") {
   if (write.phase !== "ask") return;
   Object.assign(write, { phase: "result", verdict, input, best });
+  stopListening();
+  $("w-mic").disabled = true;
   $("w-input").readOnly = true;
   $("w-input").focus({ preventScroll: true });
   const good = ["ok", "typo", "override"].includes(verdict);
@@ -1280,6 +1324,7 @@ function nextWrite() {
 }
 
 function closeWrite() {
+  stopListening();
   $("write").hidden = true;
   document.body.style.overflow = "";
   render();
@@ -1319,11 +1364,114 @@ $("w-override").addEventListener("click", () => {
   $("w-input").focus();
 });
 $("w-next").addEventListener("click", nextWrite);
-$("w-say").addEventListener("click", () => speak(currentWord().term));
+$("w-say").addEventListener("click", () => speak(currentWord().term, $("w-say")));
 $("write-close").addEventListener("click", closeWrite);
 $("write").addEventListener("keydown", (e) => {
   if (e.key === "Escape") closeWrite();
 });
+
+// --- Ovoz bilan javob: brauzerning Web Speech API si, backend kerak emas ---
+// Chrome ovozni tanish uchun uni Google serveriga yuboradi — internet bo'lishi shart.
+
+const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+const SPEECH_LANG = { en: "en-US", uz: "uz-UZ" };
+const SPEECH_ERRORS = {
+  "not-allowed": "Mikrofonga ruxsat bering (brauzer sozlamalarida)",
+  "service-not-allowed": "Bu brauzerda ovoz bilan javob berib bo'lmaydi",
+  "no-speech": "Hech narsa eshitilmadi — yana urinib ko'ring",
+  "audio-capture": "Mikrofon topilmadi",
+  network: "Ovozni tanish uchun internet kerak",
+  "language-not-supported": "Bu brauzer bu tilni tanimaydi — yozib javob bering",
+};
+const listen = { rec: null };
+
+$("w-mic").hidden = !Recognition;
+$("w-mic").closest(".write-field").classList.toggle("has-mic", !!Recognition);
+
+function setListening(on) {
+  $("w-mic").classList.toggle("on", on);
+  $("w-mic").setAttribute("aria-label", on ? "Tinglashni to'xtatish" : "Ovoz bilan javob berish");
+  $("w-listen").hidden = !on;
+}
+
+function stopListening() {
+  const rec = listen.rec;
+  if (!rec) return;
+  listen.rec = null;
+  rec.onresult = rec.onerror = rec.onend = null;
+  rec.abort();
+  setListening(false);
+}
+
+function startListening() {
+  if (write.phase !== "ask" || listen.rec) return;
+  if (!navigator.onLine) return toast("Ovozni tanish uchun internet kerak");
+  window.speechSynthesis?.cancel(); // talaffuz mikrofonga tushmasin
+
+  const rec = new Recognition();
+  rec.lang = SPEECH_LANG[session.dir];
+  rec.interimResults = true;
+  rec.maxAlternatives = 5;
+  const input = $("w-input");
+  rec.onresult = (e) => {
+    const result = e.results[0];
+    input.value = result[0].transcript;
+    if (!result.isFinal) return;
+    stopListening();
+    answerBySpeech([...result].map((alt) => alt.transcript));
+  };
+  rec.onerror = (e) => {
+    if (e.error !== "aborted") toast(SPEECH_ERRORS[e.error] ?? "Ovozni tanib bo'lmadi — yana urinib ko'ring");
+  };
+  rec.onend = stopListening;
+
+  input.value = "";
+  input.blur(); // telefonda klaviatura yopilsin
+  listen.rec = rec;
+  setListening(true);
+  try {
+    rec.start();
+  } catch {
+    stopListening();
+    toast("Mikrofonni ishga tushirib bo'lmadi");
+  }
+}
+
+/** Brauzer bir nechta variant beradi ("two", "too", "to") — eng mosini tanlaymiz */
+function answerBySpeech(alternatives) {
+  const target = WRITE_DIRS[session.dir].answer(currentWord());
+  const rank = { ok: 0, typo: 1, no: 2 };
+  let best = null;
+  for (const text of alternatives.map((s) => s.trim()).filter(Boolean)) {
+    const res = checkAnswer(text, target, session.dir);
+    if (!best || rank[res.verdict] < rank[best.res.verdict]) best = { text, res };
+  }
+  if (!best) return toast("Hech narsa eshitilmadi — yana urinib ko'ring");
+  $("w-input").value = best.text;
+  // Aytilgan so'zda imlo xatosi bo'lmaydi: deyarli mos kelsa (colour/color) — to'g'ri
+  const verdict = best.res.verdict === "no" ? "no" : write.hints ? "hint" : "ok";
+  revealWrite(verdict, best.text, best.res.best);
+}
+
+$("w-mic").addEventListener("click", () => {
+  if (listen.rec) listen.rec.stop(); // to'xtatilsa ham shu paytgacha aytilgani tekshiriladi
+  else startListening();
+});
+
+// --- Klaviatura: to'liq ekranli oynalar ko'rinadigan qismga moslashadi ---
+
+const vv = window.visualViewport;
+if (vv) {
+  const fitViewport = () => {
+    const root = document.documentElement;
+    root.style.setProperty("--vvh", `${vv.height}px`);
+    root.style.setProperty("--vvt", `${vv.offsetTop}px`);
+    root.classList.toggle("kb-open", window.innerHeight - vv.height > 120);
+  };
+  vv.addEventListener("resize", fitViewport);
+  vv.addEventListener("scroll", fitViewport);
+  fitViewport();
+}
 
 // --- Rejim tanlash oynasi ---
 
