@@ -1438,9 +1438,15 @@ main {
   display: flex;
   flex-direction: column;
   gap: 14px;
-  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  /* Deyarli shaffof emas — blur sezilmaydi, iPhone'da esa juda qimmat (oyna qotadi) */
+  background: color-mix(in srgb, var(--bg) 96%, transparent);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
   animation: sheet-up .45s cubic-bezier(.2, 1.1, .3, 1);
 }
+/* Oyna yoki mashq ochiq: orqadagi fon harakati to'xtaydi — Safari blur'ni har kadrda qayta chizmasin */
+body:has(.sheet:not([hidden]), .study:not([hidden])) .aurora span,
+body:has(.sheet:not([hidden]), .study:not([hidden])) main .btn-grad { animation-play-state: paused; }
 @keyframes sheet-up { from { transform: translateY(100%); } }
 .sheet-handle { width: 44px; height: 5px; border-radius: 999px; background: var(--surface-2); margin: 0 auto 4px; }
 .field { display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 700; color: var(--muted); }
