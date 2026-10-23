@@ -384,6 +384,25 @@
     </div>
   </div>
 
+  <!-- Ilova ichidagi brauzerda (Telegram va h.k.) ovozni tanish ishlamaydi -->
+  <div id="browser-sheet" class="sheet" hidden>
+    <div class="sheet-backdrop" data-close></div>
+    <div class="sheet-panel glass">
+      <div class="sheet-handle"></div>
+      <div>
+        <h2>Ovoz bu yerda ishlamaydi</h2>
+        <p class="muted small">Telegram ichidagi brauzer mikrofonni tanimaydi. Ilovani <span id="bs-browser">brauzerda</span> oching:</p>
+      </div>
+      <ol id="bs-steps" class="install-steps">
+        <li><span class="install-step-ic"><i data-lucide="ellipsis"></i></span><span>Yuqori o'ngdagi <b>⋯</b> menyuni bosing</span></li>
+        <li><span class="install-step-ic"><i data-lucide="compass"></i></span><span id="bs-step2"><b>Brauzerda ochish</b> ni tanlang</span></li>
+      </ol>
+      <button id="bs-open" class="btn btn-grad" type="button" hidden><i data-lucide="external-link"></i><span>Chrome'da ochish</span></button>
+      <button id="bs-copy" class="btn btn-glass" type="button"><i data-lucide="copy"></i><span>Havolani nusxalash</span></button>
+      <button class="btn btn-glass" type="button" data-close>Yozib javob beraman</button>
+    </div>
+  </div>
+
   <!-- Tabrik -->
   <div id="celebrate" class="celebrate" hidden>
     <canvas id="fx" aria-hidden="true"></canvas>

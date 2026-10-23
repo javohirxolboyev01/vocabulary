@@ -1412,15 +1412,49 @@ const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 const SPEECH_LANG = { en: "en-US", uz: "uz-UZ" };
 const SPEECH_ERRORS = {
   "not-allowed": "Mikrofonga ruxsat bering (brauzer sozlamalarida)",
-  "service-not-allowed": "Bu brauzerda ovoz bilan javob berib bo'lmaydi",
+  "service-not-allowed": isIos
+    ? "Sozlamalarda Siri va Diktovkani yoqing — Safari ovozni shular orqali taniydi"
+    : "Bu brauzerda ovoz bilan javob berib bo'lmaydi",
   "no-speech": "Hech narsa eshitilmadi — yana urinib ko'ring",
   "audio-capture": "Mikrofon topilmadi",
   network: "Ovozni tanish uchun internet kerak",
   "language-not-supported": "Bu brauzer bu tilni tanimaydi — yozib javob bering",
 };
-const listen = { rec: null };
+const listen = { rec: null, heard: [], failed: false, timer: 0 };
 
-$("w-mic").hidden = !Recognition;
+// Telegram, Instagram va boshqa ilovalar ichidagi brauzer (WebView): SpeechRecognition yo'q yoki jim ishlamaydi
+const UA = navigator.userAgent;
+const isAndroid = /android/i.test(UA);
+const inAppBrowser =
+  "TelegramWebviewProxy" in window ||
+  /Telegram|FBAN|FBAV|Instagram|Line\//i.test(UA) ||
+  (isAndroid && /; wv\)/.test(UA)) ||
+  (isIos && !/Safari\//.test(UA) && !isStandalone());
+$("w-mic").hidden = !Recognition && !inAppBrowser;
+
+function openBrowserSheet() {
+  $("bs-browser").textContent = isIos ? "Safari'da" : "Chrome'da";
+  $("bs-step2").innerHTML = isIos ? "<b>Safari'da ochish</b> ni tanlang" : "<b>Brauzerda ochish</b> ni tanlang";
+  $("bs-open").hidden = !isAndroid;
+  $("browser-sheet").hidden = false;
+  icons();
+}
+
+$("browser-sheet").addEventListener("click", (e) => {
+  if (e.target.closest("[data-close]")) $("browser-sheet").hidden = true;
+});
+// Android: intent havolasi sahifani to'g'ridan-to'g'ri Chrome'da ochadi
+$("bs-open").addEventListener("click", () => {
+  location.href = `intent://${location.host}${location.pathname}${location.hash}#Intent;scheme=https;package=com.android.chrome;end`;
+});
+$("bs-copy").addEventListener("click", async () => {
+  try {
+    await navigator.clipboard.writeText(location.href);
+    toast("Havola nusxalandi — brauzerga qo'ying");
+  } catch {
+    prompt("Havolani nusxalang:", location.href);
+  }
+});
 
 function setListening(on) {
   $("w-mic").classList.toggle("on", on);
@@ -1432,9 +1466,20 @@ function stopListening() {
   const rec = listen.rec;
   if (!rec) return;
   listen.rec = null;
+  clearTimeout(listen.timer);
   rec.onresult = rec.onerror = rec.onend = null;
   rec.abort();
   setListening(false);
+}
+
+/** Tinglash tugadi: shu paytgacha eshitilganini tekshiramiz.
+ *  Safari (va ba'zan Chrome) "isFinal" natija bermasdan to'xtaydi — oraliq natija ham hisobga olinadi. */
+function finishListening() {
+  if (!listen.rec) return;
+  const { heard, failed } = listen;
+  stopListening();
+  if (failed || write.phase !== "ask") return;
+  answerBySpeech(heard);
 }
 
 function startListening() {
@@ -1448,20 +1493,23 @@ function startListening() {
   rec.maxAlternatives = 5;
   const input = $("w-input");
   rec.onresult = (e) => {
-    const result = e.results[0];
-    input.value = result[0].transcript;
-    if (!result.isFinal) return;
-    stopListening();
-    answerBySpeech([...result].map((alt) => alt.transcript));
+    const results = [...e.results];
+    // Bir nechta bo'lak kelsa — birlashtiramiz, bitta bo'lsa — barcha variantlari kerak
+    listen.heard =
+      results.length === 1 ? [...results[0]].map((alt) => alt.transcript) : [results.map((r) => r[0].transcript).join(" ")];
+    input.value = listen.heard[0];
+    if (results.every((r) => r.isFinal)) finishListening();
   };
   rec.onerror = (e) => {
-    if (e.error !== "aborted") toast(SPEECH_ERRORS[e.error] ?? "Ovozni tanib bo'lmadi — yana urinib ko'ring");
+    if (e.error === "aborted") return;
+    listen.failed = true;
+    toast(SPEECH_ERRORS[e.error] ?? "Ovozni tanib bo'lmadi — yana urinib ko'ring");
   };
-  rec.onend = stopListening;
+  rec.onend = finishListening;
 
   input.value = "";
   input.blur(); // telefonda klaviatura yopilsin
-  listen.rec = rec;
+  Object.assign(listen, { rec, heard: [], failed: false });
   setListening(true);
   try {
     rec.start();
@@ -1488,8 +1536,13 @@ function answerBySpeech(alternatives) {
 }
 
 $("w-mic").addEventListener("click", () => {
-  if (listen.rec) listen.rec.stop(); // to'xtatilsa ham shu paytgacha aytilgani tekshiriladi
-  else startListening();
+  if (inAppBrowser) openBrowserSheet();
+  else if (listen.rec) {
+    listen.rec.stop(); // to'xtatilsa ham shu paytgacha aytilgani tekshiriladi
+    // Safari ba'zan to'xtagach "onend" ni chaqirmaydi — biroz kutib, o'zimiz yakunlaymiz
+    clearTimeout(listen.timer);
+    listen.timer = setTimeout(finishListening, 1500);
+  } else startListening();
 });
 
 // --- Klaviatura: to'liq ekranli oynalar ko'rinadigan qismga moslashadi ---
