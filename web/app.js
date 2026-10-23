@@ -141,6 +141,7 @@ function buildIndex() {
 
 const MAX_BOX = 7;
 const INTERVAL_DAYS = { 1: 1, 2: 3, 3: 7, 4: 14, 5: 30, 6: 60, 7: 120 };
+const BOX_EVERY = { 1: "har kuni", 2: "3 kunda", 3: "haftada", 4: "2 haftada", 5: "oyda", 6: "2 oyda", 7: "4 oyda" }; // qutilar oynasidagi yozuv
 const WRONG_DROP = 2;
 // Oraliqqa ±10% tasodifiy farq: bir kunda o'rganilgan so'zlar bir kunga yig'ilib qolmasin
 const JITTER = 0.1;
@@ -207,13 +208,15 @@ function streakNow() {
   return alive ? db.streak : 0;
 }
 
-function getStats() {
+/** ids berilsa — faqat shu so'zlar bo'yicha (masalan, bitta kitob) */
+function getStats(ids = Object.keys(db.progress)) {
   const boxes = {};
   for (let i = 1; i <= MAX_BOX; i++) boxes[i] = 0;
   let due = 0, known = 0, unknown = 0;
   const now = Date.now();
-  for (const [id, p] of Object.entries(db.progress)) {
-    if (!WORDS.has(id)) continue;
+  for (const id of ids) {
+    const p = db.progress[id];
+    if (!p || !WORDS.has(id)) continue;
     const st = status(id);
     if (st === "new") continue;
     boxes[p.box]++;
@@ -234,6 +237,8 @@ function packStats(level) {
   }
   return s;
 }
+
+const bookIds = (book) => [...new Set(book.packs.flatMap((p) => packIds.get(p.level)))];
 
 function bookStats(book) {
   let unitsDone = 0, studied = 0, total = 0;
@@ -888,6 +893,7 @@ function showCard() {
 
   $("study-count").textContent = `${session.i + 1}/${session.ids.length}`;
   $("study-bar").style.width = `${(session.i / session.ids.length) * 100}%`;
+  $("deck").dataset.left = Math.min(2, session.ids.length - session.i - 1);
 
   card.classList.remove("enter");
   void card.offsetWidth;
@@ -896,6 +902,11 @@ function showCard() {
 
 function flipCard() {
   $("card").classList.toggle("flipped");
+  if (reduceMotion) return;
+  const inner = $("card").querySelector(".card-inner");
+  inner.classList.remove("lift");
+  void inner.offsetWidth;
+  inner.classList.add("lift");
 }
 
 function bump(node, value) {
@@ -924,7 +935,7 @@ function answer(correct) {
   const dir = correct ? 1 : -1;
   card.classList.remove("enter");
   card.style.transition = "transform .45s cubic-bezier(.4, 0, .2, 1), opacity .45s";
-  card.style.transform = `translateX(${dir * 140}%) rotate(${dir * 22}deg)`;
+  card.style.transform = `translate3d(${dir * 140}%, 0, -120px) rotate(${dir * 22}deg) rotateY(${dir * 40}deg)`;
   card.style.opacity = "0";
   card.style.setProperty(correct ? "--ok-o" : "--no-o", 1);
 
@@ -949,6 +960,28 @@ $("study-close").addEventListener("click", closeStudy);
   const card = $("card");
   let drag = null;
 
+  // Sichqoncha bilan: karta kursorga qarab og'adi va yaltiraydi (telefonda faqat surish)
+  const setTilt = (rx, ry, glare, gx = 50, gy = 50) => {
+    card.style.setProperty("--rx", `${rx}deg`);
+    card.style.setProperty("--ry", `${ry}deg`);
+    card.style.setProperty("--glare", glare);
+    card.style.setProperty("--gx", `${gx}%`);
+    card.style.setProperty("--gy", `${gy}%`);
+  };
+  card.addEventListener("pointermove", (e) => {
+    if (drag || reduceMotion || e.pointerType !== "mouse" || session.busy) return;
+    const r = card.getBoundingClientRect();
+    const px = (e.clientX - r.left) / r.width;
+    const py = (e.clientY - r.top) / r.height;
+    card.style.transition = "none";
+    setTilt((0.5 - py) * 10, (px - 0.5) * 14, 1, px * 100, py * 100);
+  });
+  card.addEventListener("pointerleave", () => {
+    if (drag) return;
+    card.style.transition = "transform .5s var(--ease)";
+    setTilt(0, 0, 0);
+  });
+
   card.addEventListener("pointerdown", (e) => {
     if (session.busy) return;
     drag = { x: e.clientX, dx: 0 };
@@ -961,7 +994,8 @@ $("study-close").addEventListener("click", closeStudy);
   card.addEventListener("pointermove", (e) => {
     if (!drag) return;
     drag.dx = e.clientX - drag.x;
-    card.style.transform = `translateX(${drag.dx}px) rotate(${drag.dx / 16}deg)`;
+    const turn = Math.max(-25, Math.min(25, drag.dx / 8));
+    card.style.transform = `translateX(${drag.dx}px) rotate(${drag.dx / 16}deg) rotateY(${turn}deg)`;
     card.style.setProperty("--ok-o", Math.max(0, Math.min(1, drag.dx / 110)));
     card.style.setProperty("--no-o", Math.max(0, Math.min(1, -drag.dx / 110)));
   });
@@ -1224,6 +1258,7 @@ function showWriteCard() {
   input.lang = session.dir;
   $("w-hint").textContent = "";
   stopListening();
+  setListening(false);
   $("w-mic").disabled = false;
   $("w-feedback").hidden = true;
   $("w-ask-actions").hidden = false;
@@ -1386,12 +1421,11 @@ const SPEECH_ERRORS = {
 const listen = { rec: null };
 
 $("w-mic").hidden = !Recognition;
-$("w-mic").closest(".write-field").classList.toggle("has-mic", !!Recognition);
 
 function setListening(on) {
   $("w-mic").classList.toggle("on", on);
-  $("w-mic").setAttribute("aria-label", on ? "Tinglashni to'xtatish" : "Ovoz bilan javob berish");
-  $("w-listen").hidden = !on;
+  $("w-voice-title").textContent = on ? "Tinglayapman…" : "Bosib gapiring";
+  $("w-voice-sub").textContent = on ? "Tugatgach yana bosing" : "Tarjimasini ayting";
 }
 
 function stopListening() {
@@ -1556,13 +1590,150 @@ function splitLetters(node, text) {
 }
 
 function tagList(ids) {
-  return ids.map((id) => {
+  return ids.map((id, i) => {
     const w = WORDS.get(id);
     const tag = el("span", "", w.term + " ");
     tag.append(el("i", "", w.translation));
+    tag.style.setProperty("--i", Math.min(i, 20));
     return tag;
   });
 }
+
+// --- Tabrik tovushlari: Web Audio bilan shu yerning o'zida sintez qilinadi (fayl yo'q, oflayn ishlaydi) ---
+
+const SOUND_KEY = "vocab-sound";
+const sfx = { ctx: null, master: null, on: true };
+try {
+  sfx.on = localStorage.getItem(SOUND_KEY) !== "off";
+} catch {}
+
+function audio() {
+  if (!sfx.on) return null;
+  const AC = window.AudioContext || window.webkitAudioContext;
+  if (!AC) return null;
+  if (!sfx.ctx) {
+    sfx.ctx = new AC();
+    sfx.master = sfx.ctx.createGain();
+    sfx.master.gain.value = 0.55;
+    sfx.master.connect(sfx.ctx.destination);
+  }
+  if (sfx.ctx.state === "suspended") sfx.ctx.resume();
+  return sfx.ctx;
+}
+// iOS ovozni faqat foydalanuvchi bosgandan keyin ruxsat beradi — birinchi bosishda "uyg'otib" qo'yamiz
+document.addEventListener("pointerdown", () => audio(), { once: true, capture: true });
+
+/** Bitta nota: tez ko'tarilib, sekin so'nadi */
+function tone(freq, delay, dur, { type = "sine", gain = 0.2, to } = {}) {
+  const ctx = audio();
+  if (!ctx) return;
+  const t = ctx.currentTime + delay;
+  const osc = ctx.createOscillator();
+  const env = ctx.createGain();
+  osc.type = type;
+  osc.frequency.setValueAtTime(freq, t);
+  if (to) osc.frequency.exponentialRampToValueAtTime(to, t + dur);
+  env.gain.setValueAtTime(0.0001, t);
+  env.gain.exponentialRampToValueAtTime(gain, t + 0.012);
+  env.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  osc.connect(env).connect(sfx.master);
+  osc.start(t);
+  osc.stop(t + dur + 0.05);
+}
+
+/** Mushak portlashi: shovqin + past "gup" */
+function pop(power = 1) {
+  const ctx = audio();
+  if (!ctx) return;
+  const t = ctx.currentTime;
+  const len = Math.floor(ctx.sampleRate * 0.5);
+  const buf = ctx.createBuffer(1, len, ctx.sampleRate);
+  const data = buf.getChannelData(0);
+  for (let k = 0; k < len; k++) data[k] = (Math.random() * 2 - 1) * Math.pow(1 - k / len, 3);
+  const noise = ctx.createBufferSource();
+  noise.buffer = buf;
+  const band = ctx.createBiquadFilter();
+  band.type = "bandpass";
+  band.frequency.value = 900 + Math.random() * 1800;
+  band.Q.value = 0.8;
+  const env = ctx.createGain();
+  env.gain.value = 0.35 * power;
+  noise.connect(band).connect(env).connect(sfx.master);
+  noise.start(t);
+  tone(120 + Math.random() * 40, 0, 0.25, { gain: 0.25 * power, to: 50 });
+}
+
+const NOTE = { C5: 523.25, E5: 659.25, G5: 783.99, C6: 1046.5, E6: 1318.5, G6: 1568 };
+
+function fanfare(stars) {
+  const run = stars === 3 ? ["C5", "E5", "G5", "C6", "E6"] : stars === 2 ? ["C5", "E5", "G5", "C6"] : ["C5", "E5", "G5"];
+  run.forEach((n, k) => tone(NOTE[n], 0.15 + k * 0.1, 0.5, { type: "triangle", gain: 0.16 }));
+  const end = 0.15 + run.length * 0.1;
+  for (const n of ["C5", "E5", "G5", "C6"]) tone(NOTE[n], end, 1.3, { type: "triangle", gain: 0.09 });
+  // Tanga yerga tushganda jaranglaydi
+  coinTing(0.95);
+}
+
+function coinTing(delay = 0) {
+  tone(2093, delay, 0.6, { gain: 0.08 });
+  tone(2637, delay + 0.06, 0.8, { gain: 0.07 });
+  tone(3136, delay + 0.12, 0.9, { gain: 0.05 });
+}
+
+/** Yulduz chiqishi: yonganlari ko'tarilib boradi, yonmaganlari past va bo'g'iq */
+function starSounds(stars) {
+  [1.1, 1.4, 1.7].forEach((at, k) => {
+    if (k < stars) {
+      const f = [NOTE.E6, NOTE.G6, 2093][k];
+      tone(f, at, 0.5, { gain: 0.12 });
+      tone(f * 2, at, 0.3, { gain: 0.03 });
+    } else tone(220, at, 0.18, { type: "triangle", gain: 0.08, to: 160 });
+  });
+}
+
+function renderSoundBtn() {
+  const btn = $("cel-sound");
+  const label = sfx.on ? "Ovozni o'chirish" : "Ovozni yoqish";
+  btn.replaceChildren(ic(sfx.on ? "volume-2" : "volume-x"));
+  btn.setAttribute("aria-label", label);
+  btn.title = label;
+  icons();
+}
+
+$("cel-sound").addEventListener("click", () => {
+  sfx.on = !sfx.on;
+  try {
+    localStorage.setItem(SOUND_KEY, sfx.on ? "on" : "off");
+  } catch {}
+  if (sfx.on) coinTing();
+  else sfx.ctx?.suspend();
+  renderSoundBtn();
+});
+
+// Tanga qalinligi: oldi va orqa yuz orasida zich qatlamlar
+(function buildCoin() {
+  const medal = $("medal");
+  for (let z = -6; z <= 6; z += 1.5) {
+    const layer = el("span", "coin-layer");
+    layer.style.setProperty("--z", `${z}px`);
+    medal.prepend(layer);
+  }
+  const tilt = $("medal-tilt");
+  tilt.addEventListener("click", () => {
+    tilt.classList.remove("spin");
+    void tilt.offsetWidth;
+    tilt.classList.add("spin");
+    coinTing(0.1);
+    navigator.vibrate?.(10);
+  });
+  tilt.addEventListener("animationend", () => tilt.classList.remove("spin"));
+  // Sichqoncha bilan: tanga kursorga qarab buriladi
+  $("celebrate").addEventListener("pointermove", (e) => {
+    if (e.pointerType !== "mouse" || reduceMotion) return;
+    tilt.style.setProperty("--my", `${(e.clientX / innerWidth - 0.5) * 50}deg`);
+    tilt.style.setProperty("--mx", `${(0.5 - e.clientY / innerHeight) * 30}deg`);
+  });
+})();
 
 function celebrate() {
   const total = session.ok + session.no;
@@ -1625,12 +1796,17 @@ function celebrate() {
   const cel = $("celebrate");
   cel.hidden = false;
   cel.scrollTop = 0;
+  renderSoundBtn();
   icons();
   fireworks(stars);
+  fanfare(stars);
+  starSounds(stars);
 }
 
 function closeCelebrate(rerender = true) {
   $("celebrate").hidden = true;
+  $("medal-tilt").style.removeProperty("--mx");
+  $("medal-tilt").style.removeProperty("--my");
   fxStop = true;
   document.body.style.overflow = "";
   if (rerender) render();
@@ -1680,10 +1856,12 @@ function fireworks(stars) {
   confettiCannon(0, 1);
   confettiCannon(W, -1);
   setTimeout(() => !fxStop && burst(W / 2, Math.min(170, H * 0.25), "#ffc53d", 60, 7), 650);
+  pop(0.8); // konfetti to'plari
   const shots = 4 + stars * 3;
   for (let k = 0; k < shots; k++) setTimeout(() => !fxStop && launch(), 900 + k * 420);
   setTimeout(() => {
     if (fxStop || stars < 3) return;
+    pop(0.8);
     confettiCannon(0, 1);
     confettiCannon(W, -1);
   }, 2600);
@@ -1712,6 +1890,7 @@ function fireworks(stars) {
       ctx.stroke();
       if (r.y <= r.target || r.vy >= 0) {
         burst(r.x, r.y, r.color);
+        pop(0.6 + Math.random() * 0.4);
         rockets.splice(k, 1);
       }
     }
@@ -1860,18 +2039,26 @@ function renderStats() {
   );
 
   const bmax = Math.max(1, ...Object.values(s.boxes));
-  const rows = [];
+  const boxes = [];
   for (let i = 1; i <= MAX_BOX; i++) {
-    const row = el("div", "box-row");
-    const track = el("div", "box-track");
-    const fill = el("div", "box-fill");
-    fill.style.background = `var(--box-${i})`;
-    track.append(fill);
-    setWidth(fill, s.boxes[i] / bmax);
-    row.append(el("span", "", `${i}-quti`), track, el("span", "box-count", s.boxes[i]));
-    rows.push(row);
+    const box = el("div", s.boxes[i] ? "lbox" : "lbox empty");
+    box.style.setProperty("--c", `var(--box-${i})`);
+    box.title = `${i}-quti: ${s.boxes[i]} ta so'z · takrorlash ${BOX_EVERY[i]}`;
+    const cube = el("div", "lbox-cube");
+    for (const side of ["back", "left", "right", "bottom"]) cube.append(el("i", `lb-wall lb-${side}`));
+    for (const side of ["front", "left", "right", "top"]) cube.append(el("i", `lb-stack lb-s-${side}`));
+    cube.append(el("i", "lb-wall lb-front"));
+    // Taxlam balandligi: kichik sonlar ham ko'rinsin
+    const ratio = s.boxes[i] ? 0.12 + 0.88 * (s.boxes[i] / bmax) : 0;
+    requestAnimationFrame(() => requestAnimationFrame(() => cube.style.setProperty("--r", ratio)));
+    const scene = el("div", "lbox-scene");
+    scene.append(cube);
+    const label = el("div", "lbox-label");
+    label.append(el("small", "lbox-num", `${i}-quti`), el("b", "", s.boxes[i]), el("small", "", BOX_EVERY[i]));
+    box.append(scene, label);
+    boxes.push(box);
   }
-  $("boxes").replaceChildren(...rows);
+  $("boxes").replaceChildren(...boxes);
 
   $("write-stats").replaceChildren(
     ...Object.entries(WRITE_DIRS).map(([key, d]) => {
@@ -1928,15 +2115,22 @@ const PDF_COLOR = {
   teal: [20, 184, 166],
   ok: [5, 150, 105],
   no: [220, 38, 38],
+  // Samarqand koshinlari: lojuvard, firuza, oltin
+  lapis: [23, 50, 120],
+  turq: [0, 150, 170],
+  gold: [212, 162, 42],
   box: [null, [165, 216, 250], [125, 211, 252], [56, 189, 248], [14, 165, 233], [37, 99, 235], [29, 78, 216], [30, 58, 138]],
 };
 const BOOK_COLOR = { evu: PDF_COLOR.accent, basic: PDF_COLOR.teal };
 
-function buildPdf() {
+/** book = null — barcha kitoblar va o'z so'zlarim */
+function buildPdf(book = null) {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ unit: "mm", format: "a4" });
   const C = PDF_COLOR;
-  const s = getStats();
+  const s = getStats(book ? bookIds(book) : undefined);
+  const source = book ? `${book.title}  ·  ${book.level}` : "Barcha kitoblar";
+  const shown = book ? [book] : BOOKS.filter((b) => !b.soon);
   const now = Date.now();
   const left = 15, right = 195, width = right - left, bottom = 276;
   let y = 0;
@@ -1945,10 +2139,53 @@ function buildPdf() {
   const ink = (c) => doc.setTextColor(...c);
   const font = (style, size) => doc.setFont("helvetica", style).setFontSize(size);
   const fit = (text, w) => doc.splitTextToSize(pdfText(text), w)[0] || "";
+  const tint = (c, k) => c.map((v) => Math.round(v + (255 - v) * k));
+  const alpha = (o) => doc.setGState(new doc.GState({ opacity: o }));
 
-  // to'q ko'k -> osmon -> firuza gradient
+  // --- Milliy naqshlar ---
+  const poly = (pts) => {
+    const d = pts.slice(1).map((p, i) => [p[0] - pts[i][0], p[1] - pts[i][1]]);
+    doc.lines(d, pts[0][0], pts[0][1], [1, 1], "F", true);
+  };
+  // girih yulduzi: ikki kvadrat ustma-ust (8 qirra)
+  const star = (cx, cy, r, color, rot = 0) => {
+    fill(color);
+    const pts = [];
+    for (let i = 0; i < 16; i++) {
+      const a = rot + (Math.PI / 8) * i - Math.PI / 2;
+      const rr = i % 2 ? r * 0.76 : r;
+      pts.push([cx + rr * Math.cos(a), cy + rr * Math.sin(a)]);
+    }
+    poly(pts);
+  };
+  const diamond = (cx, cy, rx, ry, color) => {
+    fill(color);
+    poly([[cx, cy - ry], [cx + rx, cy], [cx, cy + ry], [cx - rx, cy]]);
+  };
+  // koshin rozetkasi: yulduz ichida yulduz
+  const rosette = (cx, cy, r, outer, inner) => {
+    star(cx, cy, r, outer);
+    star(cx, cy, r * 0.62, inner, Math.PI / 8);
+    fill(outer);
+    doc.circle(cx, cy, r * 0.22, "F");
+  };
+  // koshin hoshiyasi: lojuvard tasma, oltin yulduzlar va firuza romblar
+  const band = (by, h) => {
+    fill(C.lapis);
+    doc.rect(0, by, 210, h, "F");
+    fill(C.gold);
+    doc.rect(0, by, 210, h * 0.08, "F");
+    doc.rect(0, by + h * 0.92, 210, h * 0.08, "F");
+    const step = h * 1.6;
+    for (let x = step / 2, i = 0; x < 210 + step; x += step / 2, i++) {
+      if (i % 2) diamond(x, by + h / 2, h * 0.22, h * 0.3, C.turq);
+      else star(x, by + h / 2, h * 0.3, C.gold);
+    }
+  };
+
+  // lojuvard -> osmon -> firuza gradient
   const gradient = (x, gy, w, h) => {
-    const stops = [C.navy, C.sky, C.teal];
+    const stops = [C.lapis, C.sky, C.teal];
     const steps = 80;
     for (let i = 0; i < steps; i++) {
       const t = (i / (steps - 1)) * 2;
@@ -1961,8 +2198,8 @@ function buildPdf() {
 
   const newPage = () => {
     doc.addPage();
-    gradient(0, 0, 210, 3);
-    y = 16;
+    band(0, 6);
+    y = 18;
   };
   const ensure = (h) => {
     if (y + h <= bottom) return false;
@@ -1980,8 +2217,10 @@ function buildPdf() {
       ink(C.muted);
       doc.text(sub, right, y, { align: "right" });
     }
-    fill(C.accent);
-    doc.roundedRect(left, y + 2, 12, 1.2, 0.6, 0.6, "F");
+    fill(C.lapis);
+    doc.roundedRect(left, y + 2.2, 12, 1.2, 0.6, 0.6, "F");
+    diamond(left + 14.5, y + 2.8, 1.4, 1.8, C.gold);
+    diamond(left + 18, y + 2.8, 0.9, 1.2, C.turq);
     y += 9;
   };
   const bar = (x, by, w, h, ratio, color) => {
@@ -1994,15 +2233,32 @@ function buildPdf() {
   };
 
   // --- Sarlavha ---
-  gradient(0, 0, 210, 46);
+  gradient(0, 0, 210, 56);
+  // fonda xira koshin rozetkalari
+  alpha(0.13);
+  rosette(178, 26, 32, [255, 255, 255], C.gold);
+  rosette(130, 48, 11, [255, 255, 255], C.gold);
+  rosette(205, 56, 9, [255, 255, 255], C.gold);
+  alpha(1);
   ink([255, 255, 255]);
   font("bold", 8.5);
-  doc.text("VOCAB  ·  LEITNER TIZIMI", left, 14);
+  doc.text("VOCAB  ·  LEITNER TIZIMI", left, 13);
   font("bold", 24);
-  doc.text("O'rganish hisoboti", left, 27);
+  doc.text("O'rganish hisoboti", left, 25);
+  // qaysi kitobdan: oq yarim shaffof yorliq
+  font("bold", 11);
+  const label = fit(`Kitob:  ${source}`, 150);
+  const lw = doc.getTextWidth(label) + 10;
+  alpha(0.2);
+  fill([255, 255, 255]);
+  doc.roundedRect(left, 30, lw, 9, 4.5, 4.5, "F");
+  alpha(1);
+  star(left + 4.5, 34.5, 2, C.gold);
+  doc.text(label, left + 8, 36.2);
   font("normal", 10);
-  doc.text(`Sana: ${dayKey()}   ·   ${Object.keys(db.progress).length} ta so'z progressi`, left, 36);
-  y = 56;
+  doc.text(`Sana: ${dayKey()}   ·   ${s.known + s.unknown} ta so'z progressi`, left, 47);
+  band(56, 7);
+  y = 72;
 
   // --- Kartochkalar ---
   const cards = [
@@ -2015,16 +2271,18 @@ function buildPdf() {
   const gap = 4, cw = (width - gap * (cards.length - 1)) / cards.length;
   cards.forEach(([label, value, color], i) => {
     const x = left + i * (cw + gap);
-    fill(C.soft);
+    fill(tint(color, 0.92));
     doc.roundedRect(x, y, cw, 24, 3, 3, "F");
     fill(color);
-    doc.roundedRect(x + 4, y + 5, 6, 1.6, 0.8, 0.8, "F");
+    doc.roundedRect(x, y + 21, cw, 3, 1.5, 1.5, "F");
+    doc.rect(x, y + 21, cw, 1.5, "F");
+    star(x + cw - 5.5, y + 6, 2.6, color);
     font("bold", 17);
     ink(C.ink);
-    doc.text(String(value), x + 4, y + 15);
+    doc.text(String(value), x + 4, y + 11.5);
     font("normal", 8.5);
     ink(C.muted);
-    doc.text(label, x + 4, y + 20.5);
+    doc.text(label, x + 4, y + 17);
   });
   y += 32;
 
@@ -2036,7 +2294,8 @@ function buildPdf() {
   }
   font("bold", 11);
   ink(C.ink);
-  doc.text("So'nggi 7 kun", left + 5, y + 8);
+  // kunlik tarix kitoblarga ajratilmaydi
+  doc.text(book ? "So'nggi 7 kun (umumiy)" : "So'nggi 7 kun", left + 5, y + 8);
   doc.text("Leitner qutilari", left + pw + 11, y + 8);
   font("normal", 8.5);
   ink(C.muted);
@@ -2083,8 +2342,8 @@ function buildPdf() {
   y += ph + 4;
 
   // --- Kitoblar ---
-  heading("Kitoblar", "ma'lumot qaysi kitob so'zlari asosida");
-  for (const book of BOOKS.filter((b) => !b.soon)) {
+  heading(book ? "Kitob" : "Kitoblar", "ma'lumot qaysi kitob so'zlari asosida");
+  for (const book of shown) {
     ensure(30);
     const b = bookStats(book);
     const color = BOOK_COLOR[book.id] || C.accent;
@@ -2112,13 +2371,13 @@ function buildPdf() {
 
   // --- So'zlar: kitob -> bo'lim bo'yicha ---
   const groups = [];
-  for (const book of BOOKS) {
+  for (const book of shown) {
     const units = book.packs
       .map((p) => ({ pack: p, ids: packIds.get(p.level).filter((id) => status(id) !== "new") }))
       .filter((u) => u.ids.length);
     if (units.length) groups.push({ title: book.title, color: BOOK_COLOR[book.id] || C.accent, units });
   }
-  const own = Object.keys(db.custom).filter((id) => WORDS.has(id) && status(id) !== "new");
+  const own = book ? [] : Object.keys(db.custom).filter((id) => WORDS.has(id) && status(id) !== "new");
   if (own.length) groups.push({ title: "O'z so'zlarim", color: C.sky, units: [{ pack: null, ids: own }] });
   const total = groups.reduce((n, g) => n + g.units.reduce((m, u) => m + u.ids.length, 0), 0);
 
@@ -2129,12 +2388,15 @@ function buildPdf() {
     ["Holat", 136, 24],
     ["Keyingi", 160, 20],
   ];
-  const colHeader = () => {
+  const colHeader = (color) => {
+    fill(color);
+    doc.rect(left, y, width, 6.5, "F");
     font("bold", 7.5);
-    ink(C.muted);
-    for (const [title, x] of cols) doc.text(title.toUpperCase(), left + x, y);
-    y += 3.5;
+    ink([255, 255, 255]);
+    for (const [title, x] of cols) doc.text(title.toUpperCase(), left + x, y + 4.3);
+    y += 6.5;
   };
+  const LINE = 3.65; // 9pt qator balandligi, mm
 
   ensure(total ? 70 : 30); // sarlavha birinchi jadvaldan ajralib qolmasin
   heading("O'rganilgan so'zlar", `${total} ta so'z`);
@@ -2145,63 +2407,91 @@ function buildPdf() {
     y += 8;
   }
   for (const g of groups) {
-    ensure(42);
-    y += 5;
+    ensure(46);
+    y += 3;
+    // kitob tasmasi: rangli fon, oltin yulduz
+    fill(g.color);
+    doc.roundedRect(left, y, width, 10, 2.5, 2.5, "F");
+    alpha(0.18);
+    for (let x = right - 6, i = 0; x > right - 70; x -= 8, i++) {
+      if (i % 2) diamond(x, y + 5, 1.6, 2.4, [255, 255, 255]);
+      else star(x, y + 5, 2.8, [255, 255, 255]);
+    }
+    alpha(1);
+    star(left + 6, y + 5, 3, C.gold);
+    star(left + 6, y + 5, 1.5, g.color, Math.PI / 8);
     font("bold", 11.5);
-    ink(g.color);
-    doc.text(pdfText(g.title), left, y);
-    doc.setDrawColor(...g.color).setLineWidth(0.4);
-    doc.line(left, y + 2, right, y + 2);
-    y += 7;
+    ink([255, 255, 255]);
+    doc.text(pdfText(g.title), left + 12, y + 6.7);
+    y += 14;
     for (const u of g.units) {
       // bo'lim sarlavhasi sahifa oxirida yolg'iz qolmasin: kamida 3 qator sig'sin
-      ensure(34);
-      fill(C.soft);
-      doc.roundedRect(left, y, width, 7.5, 2, 2, "F");
+      ensure(36);
+      fill(tint(g.color, 0.88));
+      doc.roundedRect(left, y, width, 8, 2, 2, "F");
+      doc.rect(left, y + 4, width, 4, "F");
+      diamond(left + 4, y + 4, 1.3, 1.9, g.color);
       font("bold", 9.5);
       ink(C.ink);
       const name = u.pack ? `${u.pack.title}  —  ${u.pack.subtitle}` : "Qo'shilgan so'zlar";
-      doc.text(fit(name, width - 30), left + 3, y + 5);
-      font("normal", 8.5);
-      ink(C.muted);
-      doc.text(`${u.ids.length} ta so'z`, right - 3, y + 5, { align: "right" });
-      y += 12;
-      colHeader();
+      doc.text(fit(name, width - 34), left + 8, y + 5.3);
+      font("bold", 8.5);
+      ink(g.color);
+      doc.text(`${u.ids.length} ta so'z`, right - 3, y + 5.3, { align: "right" });
+      y += 8;
+      colHeader(g.color);
+      const zebra = tint(g.color, 0.94);
       u.ids.forEach((id, i) => {
-        if (ensure(6)) colHeader();
         const w = WORDS.get(id);
         const p = db.progress[id];
         const st = status(id);
+        // uzun so'z/tarjima keyingi qatorga o'tadi
+        font("bold", 9);
+        const term = doc.splitTextToSize(pdfText(w.term), cols[0][2] - 2);
+        font("normal", 9);
+        const tr = doc.splitTextToSize(pdfText(w.translation), cols[1][2] - 2);
+        const rh = 2.6 + Math.max(term.length, tr.length) * LINE;
+        if (ensure(rh)) colHeader(g.color);
         if (i % 2) {
-          fill(C.zebra);
-          doc.rect(left, y - 0.5, width, 6, "F");
+          fill(zebra);
+          doc.rect(left, y, width, rh, "F");
         }
-        const ty = y + 3.6;
+        const ty = y + 4;
         font("bold", 9);
         ink(C.ink);
-        doc.text(fit(w.term, cols[0][2] - 2), left + cols[0][1], ty);
+        doc.text(term, left + cols[0][1], ty);
         font("normal", 9);
-        doc.text(fit(w.translation, cols[1][2] - 2), left + cols[1][1], ty);
-        fill(C.box[p.box]);
-        doc.circle(left + cols[2][1] + 1.2, ty - 1.1, 1.2, "F");
-        doc.text(String(p.box), left + cols[2][1] + 4, ty);
-        font("bold", 8.5);
-        ink(st === "ok" ? C.ok : C.no);
-        doc.text(STATUS_LABEL[st], left + cols[3][1], ty);
+        doc.text(tr, left + cols[1][1], ty);
+        star(left + cols[2][1] + 1.4, ty - 1.1, 1.6, C.box[p.box]);
+        doc.text(String(p.box), left + cols[2][1] + 4.5, ty);
+        const sc = st === "ok" ? C.ok : C.no;
+        fill(tint(sc, 0.86));
+        doc.roundedRect(left + cols[3][1] - 1.5, ty - 3.1, 19, 4.4, 2.2, 2.2, "F");
+        font("bold", 8);
+        ink(sc);
+        doc.text(STATUS_LABEL[st], left + cols[3][1] + 8, ty, { align: "center" });
         font("normal", 8.5);
         ink(p.next <= now ? C.sky : C.muted);
         doc.text(p.next <= now ? "hozir" : dayKey(new Date(p.next)), left + cols[4][1], ty);
-        y += 6;
+        y += rh;
       });
-      y += 4;
+      doc.setDrawColor(...g.color).setLineWidth(0.5);
+      doc.line(left, y, right, y);
+      y += 6;
     }
   }
 
   // --- Imzo ---
   ensure(38);
   y += 4;
-  fill(C.soft);
+  fill(tint(C.lapis, 0.94));
   doc.roundedRect(left, y, width, 34, 3, 3, "F");
+  doc.setDrawColor(...C.gold).setLineWidth(0.4);
+  doc.roundedRect(left + 1.5, y + 1.5, width - 3, 31, 2, 2, "S");
+  for (const [cx, cy] of [[left + 1.5, y + 1.5], [right - 1.5, y + 1.5], [left + 1.5, y + 32.5], [right - 1.5, y + 32.5]]) {
+    star(cx, cy, 2.4, C.gold);
+    star(cx, cy, 1.1, C.lapis, Math.PI / 8);
+  }
   font("bold", 10);
   ink(C.ink);
   doc.text("Hisobot haqida", left + 6, y + 9);
@@ -2231,10 +2521,14 @@ function buildPdf() {
   for (let i = 1; i <= pages; i++) {
     doc.setPage(i);
     doc.setDrawColor(...C.line).setLineWidth(0.3);
-    doc.line(left, 284, right, 284);
+    doc.line(left, 284, 99, 284);
+    doc.line(111, 284, right, 284);
+    diamond(101.5, 284, 1, 1.4, C.turq);
+    star(105, 284, 1.9, C.gold);
+    diamond(108.5, 284, 1, 1.4, C.turq);
     font("normal", 8);
     ink(C.muted);
-    doc.text("Vocab  ·  O'rganish hisoboti", left, 289);
+    doc.text(fit(`Vocab  ·  ${source}`, 80), left, 289);
     doc.text(`${i} / ${pages}`, right, 289, { align: "right" });
   }
 
@@ -2251,19 +2545,42 @@ function readBackup(text) {
   return JSON.parse(fromBase64(text.slice(at + PDF_DATA_MARK.length).trim()));
 }
 
-$("export").addEventListener("click", () => {
+const slug = (text) => pdfText(text).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+
+function downloadPdf(book) {
   let blob;
   try {
-    blob = buildPdf();
+    blob = buildPdf(book);
   } catch {
     toast("PDF yaratib bo'lmadi");
     return;
   }
+  const name = book ? slug(`${book.title} ${book.level.split("·")[0]}`) : "barcha-kitoblar";
   const a = el("a");
   a.href = URL.createObjectURL(blob);
-  a.download = `vocab-zaxira-${dayKey()}.pdf`;
+  a.download = `vocab-${name}-${dayKey()}.pdf`;
   a.click();
   setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+
+$("export").addEventListener("click", () => {
+  const books = BOOKS.filter((b) => !b.soon).map((book) => {
+    const b = bookStats(book);
+    return {
+      icon: "book-open",
+      title: book.title,
+      desc: book.level,
+      count: b.studied,
+      disabled: b.studied === 0,
+      meta: b.studied ? "" : "Hali so'z o'rganilmagan",
+      run: () => downloadPdf(book),
+    };
+  });
+  const all = getStats();
+  openModes("PDF yuklab olish", "Hisobot qaysi kitob bo'yicha bo'lsin? Tiklash uchun zaxira har doim to'liq saqlanadi.", [
+    ...books,
+    { icon: "library", title: "Barcha kitoblar", desc: "O'z so'zlarim bilan birga", count: all.known + all.unknown, run: () => downloadPdf(null) },
+  ]);
 });
 
 $("import").addEventListener("click", () => $("import-file").click());
@@ -2292,4 +2609,5 @@ $("import-file").addEventListener("change", async (e) => {
 loadDb();
 buildIndex();
 onRoute();
+$("boot").remove();
 if (!storageOk) toast("Brauzer xotirasi yopiq: progress saqlanmaydi.");

@@ -1,7 +1,7 @@
 // Service worker: ilova internetsiz ham ochilishi uchun fayllarni keshda saqlaydi.
 // Avval tarmoqdan olinadi (yangi versiya darhol keladi), internet bo'lmasa — keshdan.
 
-const CACHE = "vocab-v2";
+const CACHE = "vocab-v3";
 const SHELL = [
   "./",
   "index.html",

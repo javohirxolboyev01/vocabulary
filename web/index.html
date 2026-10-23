@@ -32,6 +32,56 @@
   <div class="aurora" aria-hidden="true"><span></span><span></span><span></span></div>
 
   <main>
+    <!-- Skriptlar yuklanguncha ko'rinadigan skeleton: app.js birinchi chizishda o'chiradi -->
+    <div id="boot" class="boot" aria-busy="true" aria-label="Yuklanmoqda">
+      <div class="hello">
+        <div class="sk-col">
+          <i class="sk sk-line" style="width: 70px"></i>
+          <i class="sk sk-title" style="width: 230px"></i>
+          <i class="sk sk-title" style="width: 170px"></i>
+        </div>
+        <i class="sk sk-pill"></i>
+      </div>
+      <div class="hero glass">
+        <i class="sk sk-ring"></i>
+        <div class="sk-col sk-grow">
+          <i class="sk sk-line" style="width: 40%"></i>
+          <i class="sk sk-title" style="width: 75%"></i>
+          <i class="sk sk-line" style="width: 90%"></i>
+          <i class="sk sk-btn"></i>
+        </div>
+      </div>
+      <div class="quick">
+        <div class="quick-item glass"><i class="sk sk-dot"></i><i class="sk sk-num"></i><i class="sk sk-line" style="width: 60%"></i></div>
+        <div class="quick-item glass"><i class="sk sk-dot"></i><i class="sk sk-num"></i><i class="sk sk-line" style="width: 60%"></i></div>
+        <div class="quick-item glass"><i class="sk sk-dot"></i><i class="sk sk-num"></i><i class="sk sk-line" style="width: 60%"></i></div>
+      </div>
+      <div class="section-head sk-col">
+        <i class="sk sk-line" style="width: 90px"></i>
+        <i class="sk sk-title" style="width: 150px"></i>
+      </div>
+      <div class="shelf">
+        <div class="sk-book glass">
+          <i class="sk sk-cover"></i>
+          <div class="sk-col sk-grow">
+            <i class="sk sk-line" style="width: 30%"></i>
+            <i class="sk sk-title" style="width: 80%"></i>
+            <i class="sk sk-line" style="width: 50%"></i>
+            <i class="sk sk-bar"></i>
+          </div>
+        </div>
+        <div class="sk-book glass">
+          <i class="sk sk-cover"></i>
+          <div class="sk-col sk-grow">
+            <i class="sk sk-line" style="width: 30%"></i>
+            <i class="sk sk-title" style="width: 65%"></i>
+            <i class="sk sk-line" style="width: 45%"></i>
+            <i class="sk sk-bar"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Asosiy: kitoblar javoni -->
     <section id="view-home" class="view">
       <header class="hello">
@@ -218,6 +268,7 @@
     </div>
 
     <div class="stage">
+      <div id="deck" class="deck" aria-hidden="true"><span></span><span></span></div>
       <div id="card" class="swipe">
         <div class="card-inner">
           <div class="face front">
@@ -276,9 +327,12 @@
       <form id="w-form" class="write-form" autocomplete="off" novalidate>
         <div class="write-field">
           <input id="w-input" class="write-input" type="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="done" aria-label="Javob">
-          <button id="w-mic" class="mic-btn" type="button" aria-label="Ovoz bilan javob berish" hidden><i data-lucide="mic"></i></button>
         </div>
-        <p id="w-listen" class="write-listen" aria-live="polite" hidden><span class="listen-dot"></span>Tinglayapman… tarjimani ayting</p>
+        <button id="w-mic" class="voice-btn" type="button" hidden>
+          <span class="voice-orb"><i data-lucide="mic"></i></span>
+          <span class="voice-text" aria-live="polite"><b id="w-voice-title">Bosib gapiring</b><small id="w-voice-sub"></small></span>
+          <span class="voice-wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
+        </button>
         <p id="w-hint" class="write-hint" aria-live="polite"></p>
         <div id="w-feedback" class="write-feedback" role="status" hidden>
           <div id="wf-head" class="wf-head"></div>
@@ -334,10 +388,16 @@
   <div id="celebrate" class="celebrate" hidden>
     <canvas id="fx" aria-hidden="true"></canvas>
     <div class="rays" aria-hidden="true"></div>
+    <button id="cel-sound" class="icon-btn cel-sound" type="button"></button>
     <div class="cel-body">
       <div class="medal-wrap">
         <div class="medal-orbit" aria-hidden="true"><i data-lucide="star"></i><i data-lucide="sparkles"></i><i data-lucide="star"></i></div>
-        <div class="medal"><i id="cel-icon" data-lucide="trophy"></i></div>
+        <div id="medal-tilt" class="medal-tilt">
+          <div id="medal" class="medal">
+            <div class="coin-face coin-back"><i data-lucide="star"></i></div>
+            <div class="coin-face coin-front"><i id="cel-icon" data-lucide="trophy"></i></div>
+          </div>
+        </div>
         <div id="cel-ribbon" class="ribbon">Bo'lim tugallandi</div>
       </div>
       <h2 id="cel-title" class="cel-title"></h2>
