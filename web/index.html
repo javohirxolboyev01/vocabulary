@@ -2,7 +2,7 @@
 <html lang="uz">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
   <meta name="theme-color" content="#0b0a1a">
   <meta name="description" content="Inglizcha so'zlarni Leitner tizimi bilan yodlash: kartochkalar va yozish mashqi.">
   <title>Vocab</title>
@@ -328,11 +328,6 @@
         <div class="write-field">
           <input id="w-input" class="write-input" type="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="done" aria-label="Javob">
         </div>
-        <button id="w-mic" class="voice-btn" type="button" hidden>
-          <span class="voice-orb"><i data-lucide="mic"></i></span>
-          <span class="voice-text" aria-live="polite"><b id="w-voice-title">Bosib gapiring</b><small id="w-voice-sub"></small></span>
-          <span class="voice-wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
-        </button>
         <p id="w-hint" class="write-hint" aria-live="polite"></p>
         <div id="w-feedback" class="write-feedback" role="status" hidden>
           <div id="wf-head" class="wf-head"></div>
@@ -381,25 +376,6 @@
         <li><span class="install-step-ic"><i data-lucide="check"></i></span><span>Yuqori o'ngdagi <b>Qo'shish</b> ni bosing</span></li>
       </ol>
       <button class="btn btn-grad" type="button" data-close>Tushunarli</button>
-    </div>
-  </div>
-
-  <!-- Ilova ichidagi brauzerda (Telegram va h.k.) ovozni tanish ishlamaydi -->
-  <div id="browser-sheet" class="sheet" hidden>
-    <div class="sheet-backdrop" data-close></div>
-    <div class="sheet-panel glass">
-      <div class="sheet-handle"></div>
-      <div>
-        <h2>Ovoz bu yerda ishlamaydi</h2>
-        <p class="muted small">Telegram ichidagi brauzer mikrofonni tanimaydi. Ilovani <span id="bs-browser">brauzerda</span> oching:</p>
-      </div>
-      <ol id="bs-steps" class="install-steps">
-        <li><span class="install-step-ic"><i data-lucide="ellipsis"></i></span><span>Yuqori o'ngdagi <b>⋯</b> menyuni bosing</span></li>
-        <li><span class="install-step-ic"><i data-lucide="compass"></i></span><span id="bs-step2"><b>Brauzerda ochish</b> ni tanlang</span></li>
-      </ol>
-      <button id="bs-open" class="btn btn-grad" type="button" hidden><i data-lucide="external-link"></i><span>Chrome'da ochish</span></button>
-      <button id="bs-copy" class="btn btn-glass" type="button"><i data-lucide="copy"></i><span>Havolani nusxalash</span></button>
-      <button class="btn btn-glass" type="button" data-close>Yozib javob beraman</button>
     </div>
   </div>
 

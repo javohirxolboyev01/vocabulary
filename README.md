@@ -30,7 +30,7 @@ Oraliqlar: 1-quti 1 kun, 2-quti 3 kun, 3-quti 7 kun, 4-quti 14 kun, 5-quti 30 ku
 
 ## To'plamlar
 
-Manba fayllar `data/` da: `data/packs.json` (katalog), `data/a1.json`, `data/evu/unitNN.json`. Kitob so'zlari kitobdagi qalin (asosiy) so'zlardan olingan; o'zbekcha tarjimalar va misol gaplar alohida yozilgan, kitobdan ko'chirilmagan.
+Manba fayllar `data/` da: `data/packs.json` (katalog), `data/evu/unitNN.json`. Kitob so'zlari kitobdagi qalin (asosiy) so'zlardan olingan; o'zbekcha tarjimalar va misol gaplar alohida yozilgan, kitobdan ko'chirilmagan.
 
 Yangi to'plam qo'shish yoki tarjimani tuzatish: `data/` dagi JSON ni o'zgartiring, so'ng
 

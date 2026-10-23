@@ -68,7 +68,10 @@ html, body {
   font: 16px/1.45 var(--font);
   -webkit-font-smoothing: antialiased;
   -webkit-tap-highlight-color: transparent;
+  /* Ikki marta tez bosilganda sahifa kattalashmasin (iOS double-tap zoom) */
+  touch-action: manipulation;
 }
+html { overflow-x: clip; }
 body { overflow-x: clip; -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 
 button, a { font: inherit; color: inherit; }
@@ -180,6 +183,7 @@ main {
 }
 .back-btn:hover { transform: translateX(-3px); }
 
+.hello > div:first-child { min-width: 0; }
 .hello-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
 .theme-toggle {
   width: 42px;
@@ -1260,67 +1264,10 @@ main {
   transition: border-color .2s, box-shadow .2s, background .2s;
 }
 .write-input::placeholder { color: var(--muted); font-weight: 500; }
-/* Ovoz bilan javob: maydondan alohida, "bosib gapiring" ekani yaqqol ko'rinadigan panel */
-.voice-btn {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  width: 100%;
-  padding: 10px 18px 10px 10px;
-  border-radius: 18px;
-  border: 1.5px dashed color-mix(in srgb, #8b6cff 55%, transparent);
-  background: color-mix(in srgb, #8b6cff 9%, transparent);
-  color: var(--text);
-  font: inherit;
-  text-align: left;
-  cursor: pointer;
-  transition: background .25s, border-color .25s, transform .15s;
-}
-.voice-btn:hover { background: color-mix(in srgb, #8b6cff 15%, transparent); }
-.voice-btn:active { transform: scale(.98); }
-.voice-btn[hidden], .voice-btn:disabled { display: none; }
-.voice-orb {
-  position: relative;
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  flex-shrink: 0;
-  display: grid;
-  place-items: center;
-  color: #fff;
-  background: var(--grad);
-  box-shadow: 0 8px 20px -8px rgba(255, 92, 168, .8);
-  transition: background .25s;
-}
-.voice-orb .lucide { width: 22px; height: 22px; }
-.voice-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
-.voice-text b { font-size: 16px; }
-.voice-text small { font-size: 13px; color: var(--muted); }
-.voice-wave { display: flex; align-items: center; gap: 3px; height: 26px; opacity: .45; }
-.voice-wave i { width: 4px; height: 30%; border-radius: 2px; background: currentColor; }
-.voice-wave i:nth-child(2), .voice-wave i:nth-child(4) { height: 60%; }
-.voice-wave i:nth-child(3) { height: 90%; }
-
-.voice-btn.on { border-style: solid; border-color: var(--no); background: var(--no-soft); }
-.voice-btn.on .voice-orb { background: var(--no); box-shadow: none; animation: mic-pulse 1.2s ease-out infinite; }
-.voice-btn.on .voice-text b { color: var(--no); }
-.voice-btn.on .voice-wave { opacity: 1; color: var(--no); }
-.voice-btn.on .voice-wave i { animation: wave .9s ease-in-out infinite alternate; animation-delay: calc(var(--d) * -1s); }
-.voice-wave i:nth-child(1) { --d: .2; }
-.voice-wave i:nth-child(2) { --d: .5; }
-.voice-wave i:nth-child(3) { --d: .1; }
-.voice-wave i:nth-child(4) { --d: .7; }
-.voice-wave i:nth-child(5) { --d: .35; }
-@keyframes wave { from { height: 20%; } to { height: 100%; } }
-@keyframes mic-pulse {
-  0% { box-shadow: 0 0 0 0 rgba(255, 92, 122, .55); }
-  100% { box-shadow: 0 0 0 16px rgba(255, 92, 122, 0); }
-}
 /* Talaffuz aytilayotganda karnay belgisi to'lqinlanadi */
 .speaking .lucide { color: #ff8ac2; animation: say-wave .7s ease-in-out infinite alternate; }
 @keyframes say-wave { from { transform: scale(1); } to { transform: scale(1.18); filter: drop-shadow(0 0 6px rgba(255, 92, 168, .7)); } }
 @media (prefers-reduced-motion: reduce) { .speaking .lucide { animation: none; } }
-@media (prefers-reduced-motion: reduce) { .voice-btn.on .voice-orb, .voice-btn.on .voice-wave i { animation: none; } }
 .write-input:focus { border-color: #8b6cff; box-shadow: 0 0 0 5px rgba(139, 108, 255, .18); }
 .write-input.is-ok { border-color: var(--ok); background: var(--ok-soft); box-shadow: none; }
 .write-input.is-typo { border-color: var(--warn); background: var(--warn-soft); box-shadow: none; }
@@ -1489,4 +1436,16 @@ body:has(.sheet:not([hidden]), .study:not([hidden])) main .btn-grad { animation-
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; animation-delay: 0s !important; transition-duration: .01ms !important; }
   .unit, .book, .word-list li { opacity: 1; }
   .stars .lucide { transform: none; }
+}
+
+/* Tor ekran (iPhone SE/mini): sarlavha va tugmalar sig'sin, sahifa yon tomonga chiqmasin */
+@media (max-width: 360px) {
+  .hello { gap: 10px; }
+  .hello h1 { font-size: 22px; }
+  .theme-toggle { width: 38px; height: 38px; }
+  .hero { gap: 14px; padding: 18px 16px; }
+  .ring { width: 92px; height: 92px; }
+  .ring-label b { font-size: 22px; }
+  .hero-text h2 { font-size: 19px; }
+  .hero-text .btn { padding-left: 16px; padding-right: 16px; }
 }

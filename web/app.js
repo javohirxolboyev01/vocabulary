@@ -80,14 +80,6 @@ const BOOKS = [
     packs: [],
     soon: true,
   },
-  {
-    id: "basic",
-    title: "Kundalik so'zlar",
-    level: "A1 · Boshlang'ich",
-    author: "Vocab to'plami",
-    coverText: ["A1", "Kundalik so'zlar"],
-    packs: PACKS.filter((p) => !isEvu(p)),
-  },
 ];
 
 const HUES = [
@@ -1257,9 +1249,6 @@ function showWriteCard() {
   input.placeholder = dir.placeholder;
   input.lang = session.dir;
   $("w-hint").textContent = "";
-  stopListening();
-  setListening(false);
-  $("w-mic").disabled = false;
   $("w-feedback").hidden = true;
   $("w-ask-actions").hidden = false;
   $("w-after-actions").hidden = true;
@@ -1326,8 +1315,6 @@ function checkWrite() {
 function revealWrite(verdict, input = "", best = "") {
   if (write.phase !== "ask") return;
   Object.assign(write, { phase: "result", verdict, input, best });
-  stopListening();
-  $("w-mic").disabled = true;
   $("w-input").readOnly = true;
   $("w-input").focus({ preventScroll: true });
   const good = ["ok", "typo", "override"].includes(verdict);
@@ -1359,7 +1346,6 @@ function nextWrite() {
 }
 
 function closeWrite() {
-  stopListening();
   $("write").hidden = true;
   document.body.style.overflow = "";
   render();
@@ -1405,146 +1391,6 @@ $("write").addEventListener("keydown", (e) => {
   if (e.key === "Escape") closeWrite();
 });
 
-// --- Ovoz bilan javob: brauzerning Web Speech API si, backend kerak emas ---
-// Chrome ovozni tanish uchun uni Google serveriga yuboradi — internet bo'lishi shart.
-
-const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-const SPEECH_LANG = { en: "en-US", uz: "uz-UZ" };
-const SPEECH_ERRORS = {
-  "not-allowed": "Mikrofonga ruxsat bering (brauzer sozlamalarida)",
-  "service-not-allowed": isIos
-    ? "Sozlamalarda Siri va Diktovkani yoqing — Safari ovozni shular orqali taniydi"
-    : "Bu brauzerda ovoz bilan javob berib bo'lmaydi",
-  "no-speech": "Hech narsa eshitilmadi — yana urinib ko'ring",
-  "audio-capture": "Mikrofon topilmadi",
-  network: "Ovozni tanish uchun internet kerak",
-  "language-not-supported": "Bu brauzer bu tilni tanimaydi — yozib javob bering",
-};
-const listen = { rec: null, heard: [], failed: false, timer: 0 };
-
-// Telegram, Instagram va boshqa ilovalar ichidagi brauzer (WebView): SpeechRecognition yo'q yoki jim ishlamaydi
-const UA = navigator.userAgent;
-const isAndroid = /android/i.test(UA);
-const inAppBrowser =
-  "TelegramWebviewProxy" in window ||
-  /Telegram|FBAN|FBAV|Instagram|Line\//i.test(UA) ||
-  (isAndroid && /; wv\)/.test(UA)) ||
-  (isIos && !/Safari\//.test(UA) && !isStandalone());
-$("w-mic").hidden = !Recognition && !inAppBrowser;
-
-function openBrowserSheet() {
-  $("bs-browser").textContent = isIos ? "Safari'da" : "Chrome'da";
-  $("bs-step2").innerHTML = isIos ? "<b>Safari'da ochish</b> ni tanlang" : "<b>Brauzerda ochish</b> ni tanlang";
-  $("bs-open").hidden = !isAndroid;
-  $("browser-sheet").hidden = false;
-  icons();
-}
-
-$("browser-sheet").addEventListener("click", (e) => {
-  if (e.target.closest("[data-close]")) $("browser-sheet").hidden = true;
-});
-// Android: intent havolasi sahifani to'g'ridan-to'g'ri Chrome'da ochadi
-$("bs-open").addEventListener("click", () => {
-  location.href = `intent://${location.host}${location.pathname}${location.hash}#Intent;scheme=https;package=com.android.chrome;end`;
-});
-$("bs-copy").addEventListener("click", async () => {
-  try {
-    await navigator.clipboard.writeText(location.href);
-    toast("Havola nusxalandi — brauzerga qo'ying");
-  } catch {
-    prompt("Havolani nusxalang:", location.href);
-  }
-});
-
-function setListening(on) {
-  $("w-mic").classList.toggle("on", on);
-  $("w-voice-title").textContent = on ? "Tinglayapman…" : "Bosib gapiring";
-  $("w-voice-sub").textContent = on ? "Tugatgach yana bosing" : "Tarjimasini ayting";
-}
-
-function stopListening() {
-  const rec = listen.rec;
-  if (!rec) return;
-  listen.rec = null;
-  clearTimeout(listen.timer);
-  rec.onresult = rec.onerror = rec.onend = null;
-  rec.abort();
-  setListening(false);
-}
-
-/** Tinglash tugadi: shu paytgacha eshitilganini tekshiramiz.
- *  Safari (va ba'zan Chrome) "isFinal" natija bermasdan to'xtaydi — oraliq natija ham hisobga olinadi. */
-function finishListening() {
-  if (!listen.rec) return;
-  const { heard, failed } = listen;
-  stopListening();
-  if (failed || write.phase !== "ask") return;
-  answerBySpeech(heard);
-}
-
-function startListening() {
-  if (write.phase !== "ask" || listen.rec) return;
-  if (!navigator.onLine) return toast("Ovozni tanish uchun internet kerak");
-  window.speechSynthesis?.cancel(); // talaffuz mikrofonga tushmasin
-
-  const rec = new Recognition();
-  rec.lang = SPEECH_LANG[session.dir];
-  rec.interimResults = true;
-  rec.maxAlternatives = 5;
-  const input = $("w-input");
-  rec.onresult = (e) => {
-    const results = [...e.results];
-    // Bir nechta bo'lak kelsa — birlashtiramiz, bitta bo'lsa — barcha variantlari kerak
-    listen.heard =
-      results.length === 1 ? [...results[0]].map((alt) => alt.transcript) : [results.map((r) => r[0].transcript).join(" ")];
-    input.value = listen.heard[0];
-    if (results.every((r) => r.isFinal)) finishListening();
-  };
-  rec.onerror = (e) => {
-    if (e.error === "aborted") return;
-    listen.failed = true;
-    toast(SPEECH_ERRORS[e.error] ?? "Ovozni tanib bo'lmadi — yana urinib ko'ring");
-  };
-  rec.onend = finishListening;
-
-  input.value = "";
-  input.blur(); // telefonda klaviatura yopilsin
-  Object.assign(listen, { rec, heard: [], failed: false });
-  setListening(true);
-  try {
-    rec.start();
-  } catch {
-    stopListening();
-    toast("Mikrofonni ishga tushirib bo'lmadi");
-  }
-}
-
-/** Brauzer bir nechta variant beradi ("two", "too", "to") — eng mosini tanlaymiz */
-function answerBySpeech(alternatives) {
-  const target = WRITE_DIRS[session.dir].answer(currentWord());
-  const rank = { ok: 0, typo: 1, no: 2 };
-  let best = null;
-  for (const text of alternatives.map((s) => s.trim()).filter(Boolean)) {
-    const res = checkAnswer(text, target, session.dir);
-    if (!best || rank[res.verdict] < rank[best.res.verdict]) best = { text, res };
-  }
-  if (!best) return toast("Hech narsa eshitilmadi — yana urinib ko'ring");
-  $("w-input").value = best.text;
-  // Aytilgan so'zda imlo xatosi bo'lmaydi: deyarli mos kelsa (colour/color) — to'g'ri
-  const verdict = best.res.verdict === "no" ? "no" : write.hints ? "hint" : "ok";
-  revealWrite(verdict, best.text, best.res.best);
-}
-
-$("w-mic").addEventListener("click", () => {
-  if (inAppBrowser) openBrowserSheet();
-  else if (listen.rec) {
-    listen.rec.stop(); // to'xtatilsa ham shu paytgacha aytilgani tekshiriladi
-    // Safari ba'zan to'xtagach "onend" ni chaqirmaydi — biroz kutib, o'zimiz yakunlaymiz
-    clearTimeout(listen.timer);
-    listen.timer = setTimeout(finishListening, 1500);
-  } else startListening();
-});
-
 // --- Klaviatura: to'liq ekranli oynalar ko'rinadigan qismga moslashadi ---
 
 const vv = window.visualViewport;
@@ -1559,6 +1405,9 @@ if (vv) {
   vv.addEventListener("scroll", fitViewport);
   fitViewport();
 }
+
+// iOS maximum-scale=1 ni e'tiborsiz qoldiradi: ikki barmoq bilan kattalashtirishni o'zimiz to'xtatamiz
+for (const type of ["gesturestart", "gesturechange"]) document.addEventListener(type, (e) => e.preventDefault(), { passive: false });
 
 // --- Rejim tanlash oynasi ---
 
@@ -2174,7 +2023,7 @@ const PDF_COLOR = {
   gold: [212, 162, 42],
   box: [null, [165, 216, 250], [125, 211, 252], [56, 189, 248], [14, 165, 233], [37, 99, 235], [29, 78, 216], [30, 58, 138]],
 };
-const BOOK_COLOR = { evu: PDF_COLOR.accent, basic: PDF_COLOR.teal };
+const BOOK_COLOR = { evu: PDF_COLOR.accent };
 
 /** book = null — barcha kitoblar va o'z so'zlarim */
 function buildPdf(book = null) {

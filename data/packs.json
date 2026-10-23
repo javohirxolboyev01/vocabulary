@@ -1,5 +1,4 @@
 [
-  {"level": "A1", "file": "a1.json", "title": "A1 — boshlang'ich", "subtitle": "Kundalik eng ko'p ishlatiladigan so'zlar", "group": "Umumiy"},
   {"level": "EVU-01", "file": "evu/unit01.json", "title": "1. The family", "subtitle": "Oila", "group": "Odamlar · People"},
   {"level": "EVU-02", "file": "evu/unit02.json", "title": "2. Birth, marriage and death", "subtitle": "Tug'ilish, nikoh va o'lim", "group": "Odamlar · People"},
   {"level": "EVU-03", "file": "evu/unit03.json", "title": "3. Parts of the body", "subtitle": "Tana a'zolari", "group": "Odamlar · People"},
